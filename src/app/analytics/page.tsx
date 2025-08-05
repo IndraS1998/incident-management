@@ -34,7 +34,7 @@ const Analytics: NextPage = () => {
                         </Link>
                         <Link 
                         href="/management" 
-                        className={`hover:text-[#FFA400] transition-colors duration-200 font-medium ${
+                        className={`hover:text-[rgb(255,164,0)] transition-colors duration-200 font-medium ${
                             isActive('/management') ? 'text-[#FFA400]' : ''
                         }`}
                         aria-current={isActive('/management') ? 'page' : undefined}
