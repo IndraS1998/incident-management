@@ -1,32 +1,83 @@
 'use client';
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { alertService } from '@/lib/alert.service';
 
 export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [formData, setFormData] = useState({
+    admin_id: '',
+    password: ''
+  });
+  const [loading, setLoading] = useState(false);
+
+  const r = useRouter()
+
+  useEffect(()=>{
+    const authToken = localStorage.getItem('authToken');
+    if (authToken) {
+      // Redirect to dashboard if already authenticated
+      r.push('/dashboard');
+    }
+  },[r])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const { admin_id, password } = formData;
+    
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/authentication', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ admin_id, password_hash: password }),
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok) {
+        alertService.error("Network Error");
+        throw new Error(payload.message || 'Login failed');
+      }else{
+        console.log(payload.data)
+        alertService.success("Login successful!");
+        localStorage.setItem('authToken', "true"); //API returns a token
+        localStorage.setItem('admin_user', JSON.stringify(payload.data));
+        r.push('/dashboard');
+      }
+    } catch (error) {
+      console.log(error)
+      alertService.error("Invalid credentials");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#EAF6FF] p-4">
-      <div className="w-full max-w-md bg-[#EAF6FF] rounded-lg shadow-lg overflow-hidden">
+      <form onSubmit={handleSubmit} className="w-full max-w-md bg-[#EAF6FF] rounded-lg shadow-lg overflow-hidden">
         <div className="p-6 text-center">
           <h2 className="text-2xl font-bold text-[#14213d]">
-            {isLogin ? "Admin Login" : "Create Account"}
+            Admin Login
           </h2>
           <p className="text-[#8d99ae] mt-2">
-            {isLogin 
-              ? "Access your incident reporting dashboard" 
-              : "Set up your admin account"}
+            Access your incident management dashboard
           </p>
         </div>
         
         <div className="px-6 pb-6 space-y-4">
           <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-[#14213d]">
-              Email
+            <label htmlFor="username" className="block text-sm font-medium text-[#14213d]">
+              Login Name
             </label>
             <input
-              id="email"
-              type="email"
-              placeholder="admin@example.com"
+              id="username"
+              type="text"
+              placeholder="aadmin"
+              onChange={(e) => setFormData({...formData, admin_id: e.target.value})}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFA400]"
             />
           </div>
@@ -39,26 +90,12 @@ export default function AuthPage() {
               id="password"
               type="password"
               placeholder="••••••••"
+              onChange={(e) => setFormData({...formData, password: e.target.value})}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFA400]"
             />
           </div>
           
-          {!isLogin && (
-            <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#14213d]">
-                Confirm Password
-              </label>
-              <input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFA400]"
-              />
-            </div>
-          )}
-          
-          {isLogin && (
-            <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center">
               <div className="flex items-center space-x-2">
                 <input 
                   type="checkbox" 
@@ -73,25 +110,44 @@ export default function AuthPage() {
                 Forgot password?
               </button>
             </div>
-          )}
         </div>
         
         <div className="px-6 pb-6 space-y-4">
-          <button className="cursor-pointer w-full py-2 px-4 bg-[#FFA400] hover:bg-[#e69500] text-white font-medium rounded-md transition duration-200">
-            {isLogin ? "Sign In" : "Create Account"}
+          <button
+            disabled={loading}
+            className={`cursor-pointer w-full py-2 px-4 bg-[#FFA400] hover:bg-[#e69500] text-white font-medium rounded-md transition duration-200 ${
+              loading ? 'pointer-events-none' : ''
+            }`}
+          >
+            {loading ? (
+              <div className="flex items-center justify-center">
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              </div>
+            ) : (
+              'Sign In'
+            )}
           </button>
-          
-          <div className="text-center text-sm text-[#8d99ae]">
-            {isLogin ? "Don't have an account?" : "Already have an account?"}
-            <button 
-              className="text-[#FFA400] hover:underline ml-1 cursor-pointer" 
-              onClick={() => setIsLogin(!isLogin)}
-            >
-              {isLogin ? "Sign up" : "Sign in"}
-            </button>
-          </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

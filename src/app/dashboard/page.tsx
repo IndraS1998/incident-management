@@ -1,17 +1,11 @@
 'use client';
 import { NextPage } from 'next';
 import Head from 'next/head';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Navbar from '@/components/navbar';
 import Footer from '../../../components/footer/footerComponent';
 
 const Dashboard: NextPage = () => {
-    const pathname = usePathname();
 
-    // Helper function to determine active link
-    const isActive = (path: string) => {
-        return pathname === path;
-    };
     // Mock data - will be replaced with real data later
     const incidents = [
         { id: 1, title: 'Server Down', type: 'Infrastructure', status: 'Open', urgency: 'High', date: '2023-05-15' },
@@ -32,50 +26,7 @@ const Dashboard: NextPage = () => {
       <Head>
         <title>Admin Dashboard | Incident Reporting</title>
       </Head>
-
-      {/* Header */}
-      <header className="bg-[#2A2A72] text-white p-4 shadow-md">
-            <div className="container mx-auto flex justify-between items-center">
-                <div className="flex items-center space-x-8">
-                    <h1 className="text-2xl font-bold">Incident Reporting</h1>
-                    <nav className="hidden md:flex items-center space-x-6">
-                        <Link href="/dashboard" 
-                            className={`hover:text-[#FFA400] transition-colors duration-200 font-medium ${
-                                isActive('/dashboard') ? 'text-[#FFA400]' : ''
-                            }`}
-                            aria-current={isActive('/dashboard') ? 'page' : undefined}
-                            >
-                            Dashboard
-                        </Link>
-                        <Link 
-                        href="/management" 
-                        className={`hover:text-[#FFA400] transition-colors duration-200 font-medium ${
-                            isActive('/management') ? 'text-[#FFA400]' : ''
-                        }`}
-                        aria-current={isActive('/management') ? 'page' : undefined}
-                        >
-                            Incident Management
-                        </Link>
-                        <Link 
-                            href="/analytics" 
-                            className={`hover:text-[#FFA400] transition-colors duration-200 font-medium ${
-                                isActive('/analytics') ? 'text-[#FFA400]' : ''
-                            }`}
-                            aria-current={isActive('/analytics') ? 'page' : undefined}
-                        >
-                            Analytics
-                        </Link>
-                    </nav>
-                </div>
-                <div className="flex items-center space-x-4">
-                    <span className="text-[#009FFD] font-medium hidden sm:inline">Admin User</span>
-                    <div className="w-10 h-10 rounded-full bg-[#FFA400] flex items-center justify-center">
-                        <span className="text-[#232528] font-bold">AU</span>
-                    </div>
-                </div>
-            </div>
-        </header>
-
+      <Navbar />
       <main className="container mx-auto p-4">
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

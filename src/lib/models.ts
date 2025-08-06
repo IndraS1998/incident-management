@@ -41,7 +41,7 @@ enum ResolutionStrategyType {
 
 // Interfaces
 interface IAdmin extends Document {
-  admin_id: string;
+  admin_id: string; // Unique identifier for the admin composed of first letter of first name and lastname
   name: string;
   email: string;
   phone: string;
