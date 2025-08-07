@@ -101,6 +101,7 @@ export default function AdministratorsManagement(){
         <div className="min-h-screen bg-[#EAF6FF]">
             <Navbar/>
             <main className="container mx-auto p-4">
+                <h1 className="text-2xl font-bold text-[#232528] mb-6">Administrator Management</h1>
                 <form onSubmit={handleSubmit(async formData =>{
                     setLoading(true);
                     try{

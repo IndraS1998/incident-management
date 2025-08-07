@@ -59,7 +59,7 @@ export default function Navbar(){
                 r.push('/'); // Redirect to login page if no admin data
             }
         }
-    },[r])
+    },[r,pathname])
 
     function onLogout(){
         localStorage.removeItem('authToken');
@@ -172,7 +172,7 @@ export default function Navbar(){
                     {/* Dropdown panel */}
                     {isSettingsOpen && (
                         <div className="absolute right-0 mt-2 w-48 font-medium bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
-                            <Link href="/Settings" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
+                            <Link href="/settings" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
                                 <Cog6ToothIcon className="h-5 w-5 mr-3 text-gray-700" />
                                 Settings
                             </Link>
