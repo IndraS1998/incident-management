@@ -140,9 +140,9 @@ export default function Navbar(){
                                                 <Cog6ToothIcon className="h-5 w-5 mr-3 text-gray-700" />
                                                 Administrators
                                             </Link>
-                                            <Link href="/cms/localization" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
+                                            <Link href="/cms/locals" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
                                                 <Cog6ToothIcon className="h-5 w-5 mr-3 text-gray-700" />
-                                                Localization
+                                                Locals
                                             </Link>
                                             <Link href="/cms/departments" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
                                                 <Cog6ToothIcon className="h-5 w-5 mr-3 text-gray-700" />
