@@ -211,112 +211,112 @@ export default function AdministratorsManagement(){
                 <div className="bg-white rounded-lg shadow overflow-hidden border border-[#EAF6FF]">
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-[#EAF6FF]">
-                        <thead className="bg-[#2A2A72] bg-opacity-50">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">User Name</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Full Name</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Email</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Contact</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Role</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-[#EAF6FF]">
-                            {administrators.map((admin) => (
-                            <tr key={admin.admin_id} className="hover:bg-[#EAF6FF] hover:bg-opacity-30">
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#232528]">
-                                    {admin.admin_id}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-[#232528]">
-                                    {admin.name}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    {admin.email}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    {admin.phone}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <thead className="bg-[#2A2A72] bg-opacity-50">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">User Name</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Full Name</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Email</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Contact</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Status</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Role</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-[#EAF6FF]">
+                                {administrators.map((admin) => (
+                                <tr key={admin.admin_id} className="hover:bg-[#EAF6FF] hover:bg-opacity-30">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#232528]">
+                                        {admin.admin_id}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#232528]">
+                                        {admin.name}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                        {admin.email}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                        {admin.phone}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                        {editingAdmin === admin.admin_id ? (
+                                            <select
+                                            {...register("status")}
+                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm p-1 border border-[#EAF6FF] font-medium ${
+                                                watch("status") === AdminStatus.ACTIVE 
+                                                ? 'bg-green-100 text-green-800' 
+                                                : 'bg-red-100 text-red-800'
+                                            }`}
+                                            >
+                                            {statuses.map(status => (
+                                                <option key={status} value={status}>{status}</option>
+                                            ))}
+                                            </select>
+                                        ) : (
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${
+                                            admin.status === AdminStatus.ACTIVE 
+                                                ? 'bg-green-100 text-green-800' 
+                                                : 'bg-red-100 text-red-800'
+                                            }`}>
+                                            {admin.status}
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
                                     {editingAdmin === admin.admin_id ? (
                                         <select
-                                        {...register("status")}
-                                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm p-1 border border-[#EAF6FF] font-medium ${
-                                            watch("status") === AdminStatus.ACTIVE 
-                                            ? 'bg-green-100 text-green-800' 
-                                            : 'bg-red-100 text-red-800'
-                                        }`}
+                                        {...register("role")}
+                                        className="p-1 text-sm border border-[#EAF6FF] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
                                         >
-                                        {statuses.map(status => (
-                                            <option key={status} value={status}>{status}</option>
+                                        {roles.map(role => (
+                                            <option key={role} value={role}>{role}</option>
                                         ))}
                                         </select>
                                     ) : (
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${
-                                        admin.status === AdminStatus.ACTIVE 
-                                            ? 'bg-green-100 text-green-800' 
-                                            : 'bg-red-100 text-red-800'
-                                        }`}>
-                                        {admin.status}
-                                        </span>
+                                        admin.role
                                     )}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                {editingAdmin === admin.admin_id ? (
-                                    <select
-                                    {...register("role")}
-                                    className="p-1 text-sm border border-[#EAF6FF] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
-                                    >
-                                    {roles.map(role => (
-                                        <option key={role} value={role}>{role}</option>
-                                    ))}
-                                    </select>
-                                ) : (
-                                    admin.role
-                                )}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    <div className="flex justify-start space-x-2">
-                                        {editingAdmin === admin.admin_id ? (
-                                        <>
-                                            <button 
-                                            type="button" 
-                                            onClick={() => handleSave(admin.admin_id)}
-                                            className="px-4 py-2 bg-[#2A2A72] text-white rounded cursor-pointer"
-                                            disabled={loading}
-                                            >
-                                            {loading ? 'Saving...' : 'Save'}
-                                            </button>
-                                            <button 
-                                            type="button" 
-                                            onClick={() => setEditingAdmin(null)}
-                                            className="px-4 py-2 bg-gray-500 text-white rounded cursor-pointer"
-                                            >
-                                            Cancel
-                                            </button>
-                                        </>
-                                        ) : (
-                                        <>
-                                            <button 
-                                            type="button" 
-                                            className="px-4 py-2 text-white bg-[#FFA400] rounded cursor-pointer"
-                                            >
-                                            More 
-                                            </button>
-                                            <button 
-                                            type="button" 
-                                            onClick={() => handleEdit(admin)}
-                                            className="px-4 py-2 bg-[#2A2A72] text-white rounded cursor-pointer"
-                                            >
-                                            Edit
-                                            </button>
-                                        </>
-                                        )}
-                                    </div>
-                                </td>
-                            </tr>
-                            ))}
-                        </tbody>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                        <div className="flex justify-start space-x-2">
+                                            {editingAdmin === admin.admin_id ? (
+                                            <>
+                                                <button 
+                                                type="button" 
+                                                onClick={() => handleSave(admin.admin_id)}
+                                                className="px-4 py-2 bg-[#2A2A72] text-white rounded cursor-pointer"
+                                                disabled={loading}
+                                                >
+                                                {loading ? 'Saving...' : 'Save'}
+                                                </button>
+                                                <button 
+                                                type="button" 
+                                                onClick={() => setEditingAdmin(null)}
+                                                className="px-4 py-2 bg-gray-500 text-white rounded cursor-pointer"
+                                                >
+                                                Cancel
+                                                </button>
+                                            </>
+                                            ) : (
+                                            <>
+                                                <button 
+                                                type="button" 
+                                                className="px-4 py-2 text-white bg-[#FFA400] rounded cursor-pointer"
+                                                >
+                                                More 
+                                                </button>
+                                                <button 
+                                                type="button" 
+                                                onClick={() => handleEdit(admin)}
+                                                className="px-4 py-2 bg-[#2A2A72] text-white rounded cursor-pointer"
+                                                >
+                                                Edit
+                                                </button>
+                                            </>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                                ))}
+                            </tbody>
                         </table>
                     </div>
                 </div>
