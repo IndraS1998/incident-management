@@ -5,8 +5,10 @@ import { useState, useRef, useEffect } from 'react';
 import { 
   Cog6ToothIcon, 
   ArrowLeftOnRectangleIcon,
-  ChevronDownIcon 
+  ChevronDownIcon ,
+  BuildingOffice2Icon
 } from '@heroicons/react/24/outline';
+import { UserCircleIcon,Squares2X2Icon } from '@heroicons/react/24/solid';
 
 
 // Interfaces
@@ -102,11 +104,11 @@ export default function Navbar(){
                             Dashboard
                         </Link>
                         <Link 
-                        href="/management" 
-                        className={`hover:text-[#FFA400]/80 transition-colors duration-200 font-medium ${
-                            isActive('/management') ? 'text-[#FFA400]' : ''
-                        }`}
-                        aria-current={isActive('/management') ? 'page' : undefined}
+                            href="/management" 
+                            className={`hover:text-[#FFA400]/80 transition-colors duration-200 font-medium ${
+                                isActive('/management') ? 'text-[#FFA400]' : ''
+                            }`}
+                            aria-current={isActive('/management') ? 'page' : undefined}
                         >
                             Incident Management
                         </Link>
@@ -137,15 +139,15 @@ export default function Navbar(){
                                     {isContentManagementOpen && (
                                         <div className="absolute right-0 mt-2 w-48 font-medium bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
                                             <Link href="/cms/administrators" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
-                                                <Cog6ToothIcon className="h-5 w-5 mr-3 text-gray-700" />
+                                                <UserCircleIcon className="h-5 w-5 mr-3 text-gray-700" />
                                                 Administrators
                                             </Link>
                                             <Link href="/cms/locals" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
-                                                <Cog6ToothIcon className="h-5 w-5 mr-3 text-gray-700" />
+                                                <BuildingOffice2Icon className="h-5 w-5 mr-3 text-gray-700" />
                                                 Locals
                                             </Link>
                                             <Link href="/cms/departments" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
-                                                <Cog6ToothIcon className="h-5 w-5 mr-3 text-gray-700" />
+                                                <Squares2X2Icon className="h-5 w-5 mr-3 text-gray-700" />
                                                 Departments
                                             </Link>
                                         </div>

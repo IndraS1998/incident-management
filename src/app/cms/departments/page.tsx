@@ -5,6 +5,7 @@ import Footer from '@/components/footerComponent';
 import { alertService } from '@/lib/alert.service';
 import {useForm,Controller} from 'react-hook-form';
 import Select from "react-select";
+import TableSkeleton from '@/components/locals/skeleton';
 
 interface Department {
   _id: string;
@@ -61,8 +62,10 @@ export default function DepartmentTable() {
     const [expandedDept, setExpandedDept] = useState<string | null>(null);
     const [departments, setDepartments] = useState<Department[]>([]);
     const [isModalOpen,setIsModalOpen] = useState<boolean>(false)
+    const [loading,setLoading] = useState<boolean>(false)
 
     async function fetchDepartments(){
+        setLoading(true)
         try{
             const response = await fetch('/api/departments')
             if(!response.ok){
@@ -74,6 +77,8 @@ export default function DepartmentTable() {
         }catch(error){
             alertService.error("Failed to fetch departments");
             console.log('Error fetching departments:', error);
+        }finally{
+            setLoading(false)
         }
     }
 
@@ -84,84 +89,87 @@ export default function DepartmentTable() {
     }, []);
 
     return (
-        <div className='bg-[#EAF6FF] min-h-screen'>
-            {isModalOpen && (
-                <ModalContent onClose={() => setIsModalOpen(false)} refresh={fetchDepartments} />
-            )}
-            <Navbar />
-            <main className="container mx-auto p-4">
-                <h1 className="text-2xl font-bold text-[#232528] mb-6">Department Management</h1>
-                <button className="px-4 py-2 mb-2 cursor-pointer bg-[#FFA400] hover:bg-[#e69500] text-white font-medium rounded-md transition-colors"
-                    onClick={()=>setIsModalOpen(true)}
-                >
-                    New Department
-                </button>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-[#EAF6FF]">
-                        <thead className='bg-[#2A2A72] bg-opacity-50 text-[#EAF6FF]'>
-                            <tr>
-                                <th className="py-3 px-4 text-left">Department</th>
-                                <th className="py-3 px-4 text-left">Contact</th>
-                                <th className="py-3 px-4 text-center">Rooms</th>
-                                <th className="py-3 px-4 text-center">Managers</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {departments.map((dept) => (
-                            <>
-                                {/* Main Row */}
-                                <tr 
-                                    key={dept._id} 
-                                    className="border-t hover:bg-gray-50 cursor-pointer"
-                                    onClick={() => setExpandedDept(expandedDept === dept._id ? null : dept._id)}
-                                >
-                                    <td className="py-3 px-4 font-medium">{dept.name}</td>
-                                    <td className="py-3 px-4 text-gray-600">{dept.contact}</td>
-                                    <td className="py-3 px-4 text-center">{dept.roomCount}</td>
-                                    <td className="py-3 px-4 text-center">{dept.managerCount}</td>
-                                    
+        <>
+            <div className='bg-[#EAF6FF] min-h-screen'>
+                {isModalOpen && (
+                    <ModalContent onClose={() => setIsModalOpen(false)} refresh={fetchDepartments} />
+                )}
+                <Navbar />
+                <main className="container mx-auto p-4">
+                    <h1 className="text-2xl font-bold text-[#232528] mb-6">Department Management</h1>
+                    {loading && <TableSkeleton />}
+                    <button className="px-4 py-2 mb-2 cursor-pointer bg-[#FFA400] hover:bg-[#e69500] text-white font-medium rounded-md transition-colors"
+                        onClick={()=>setIsModalOpen(true)}
+                    >
+                        New Department
+                    </button>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-[#EAF6FF]">
+                            <thead className='bg-[#2A2A72] bg-opacity-50 text-[#EAF6FF]'>
+                                <tr>
+                                    <th className="py-3 px-4 text-left">Department</th>
+                                    <th className="py-3 px-4 text-left">Contact</th>
+                                    <th className="py-3 px-4 text-center">Rooms</th>
+                                    <th className="py-3 px-4 text-center">Managers</th>
                                 </tr>
-
-                                {/* Expanded Details Row */}
-                                {expandedDept === dept._id && (
-                                    <tr className="bg-gray-50">
-                                        <td colSpan={5} className="px-4 py-3">
-                                            <div className="grid grid-cols-2 gap-4">
-                                            {/* Rooms Section */}
-                                            <div>
-                                                <h4 className="font-medium mb-2">Rooms</h4>
-                                                <ul className="space-y-1">
-                                                {dept.rooms.map((room, i) => (
-                                                    <li key={i} className="text-sm">
-                                                    {room.building_name}, Floor {room.floor_number}, Room {room.room_number}
-                                                    </li>
-                                                ))}
-                                                </ul>
-                                            </div>
-
-                                            {/* Managers Section */}
-                                            <div>
-                                                <h4 className="font-medium mb-2">Managers</h4>
-                                                <ul className="space-y-1">
-                                                {dept.managers.map((manager, i) => (
-                                                    <li key={i} className="text-sm">
-                                                    {manager.name} ({manager.role})
-                                                    </li>
-                                                ))}
-                                                </ul>
-                                            </div>
-                                            </div>
-                                        </td>
+                            </thead>
+                            <tbody>
+                            {departments.map((dept) => (
+                                <>
+                                    {/* Main Row */}
+                                    <tr 
+                                        key={dept._id} 
+                                        className="border-t hover:bg-gray-50 cursor-pointer"
+                                        onClick={() => setExpandedDept(expandedDept === dept._id ? null : dept._id)}
+                                    >
+                                        <td className="py-3 px-4 font-medium">{dept.name}</td>
+                                        <td className="py-3 px-4 text-gray-600">{dept.contact}</td>
+                                        <td className="py-3 px-4 text-center">{dept.roomCount}</td>
+                                        <td className="py-3 px-4 text-center">{dept.managerCount}</td>
+                                        
                                     </tr>
-                                )}
-                            </>
-                        ))}
-                        </tbody>
-                    </table>
-                    </div>
-            </main>
+
+                                    {/* Expanded Details Row */}
+                                    {expandedDept === dept._id && (
+                                        <tr className="bg-gray-50">
+                                            <td colSpan={5} className="px-4 py-3">
+                                                <div className="grid grid-cols-2 gap-4">
+                                                {/* Rooms Section */}
+                                                <div>
+                                                    <h4 className="font-medium mb-2">Rooms</h4>
+                                                    <ul className="space-y-1">
+                                                    {dept.rooms.map((room, i) => (
+                                                        <li key={i} className="text-sm">
+                                                        {room.building_name}, Floor {room.floor_number}, Room {room.room_number}
+                                                        </li>
+                                                    ))}
+                                                    </ul>
+                                                </div>
+
+                                                {/* Managers Section */}
+                                                <div>
+                                                    <h4 className="font-medium mb-2">Managers</h4>
+                                                    <ul className="space-y-1">
+                                                    {dept.managers.map((manager, i) => (
+                                                        <li key={i} className="text-sm">
+                                                        {manager.name} ({manager.role})
+                                                        </li>
+                                                    ))}
+                                                    </ul>
+                                                </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </>
+                            ))}
+                            </tbody>
+                        </table>
+                        </div>
+                </main>
+            </div>
             <Footer />
-        </div>
+        </>
     );
 }
 

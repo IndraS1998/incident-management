@@ -16,14 +16,14 @@ export async function initializeDatabase(): Promise<{ success: boolean; message:
 
     // Initialize all models and indexes
     await Promise.all([
-      Admin.init(),
-      Department.init(),
-      Building.init(),
-      Floor.init(),
-      Room.init(),
+      //Admin.init(),
+      //Department.init(),
+      //Building.init(),
+      //Floor.init(),
+      //Room.init(),
       Incident.init(),
-      IncidentResolution.init(),
-      AdminDepartment.init()
+      //IncidentResolution.init(),
+      //AdminDepartment.init()
     ]);
 
     // Create any additional indexes not defined in schemas
