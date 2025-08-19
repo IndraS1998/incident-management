@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
+import { fetchData } from '@/lib/functions';
 import { 
   Cog6ToothIcon, 
   ArrowLeftOnRectangleIcon,
@@ -23,13 +24,14 @@ enum AdminRole {
 }
 
 interface IAdmin {
-  admin_id: string; // Unique identifier for the admin composed of first letter of first name and lastname
-  name: string;
-  email: string;
-  phone: string;
-  password_hash: string;
-  status: AdminStatus;
-  role: AdminRole;
+    _id:string;
+    admin_id: string; // Unique identifier for the admin composed of first letter of first name and lastname
+    name: string;
+    email: string;
+    phone: string;
+    password_hash: string;
+    status: AdminStatus;
+    role: AdminRole;
 }
 
 export default function Navbar(){
@@ -38,11 +40,29 @@ export default function Navbar(){
 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isContentManagementOpen,setIsContentManagenentOpen] = useState(false)
+    const [incidentCount,setIncidentcount] = useState<number>(0)
+    const [isLoading,setIsLoading] = useState<boolean>(false);
 
     const dropdownSettingsRef = useRef<HTMLDivElement>(null);
     const dropdownContentManagementRef = useRef<HTMLDivElement>(null);
 
     const [admin,setAdmin] = useState<IAdmin | null>(null);
+
+    async function fetchIncidents(role:string,admin_id: string|null){
+        let data
+        if(role === 'superadmin'){
+            data = await fetchData(`/api/incidents/admin?count=true`,setIsLoading);
+        }else{
+            data = await fetchData(`/api/incidents?adminId=${admin_id}&count=true`,setIsLoading);
+        }
+        setIncidentcount(data.count)
+    }
+
+    useEffect(()=>{
+        const adminData = localStorage.getItem('admin_user');
+        const connectedAdmin : IAdmin = adminData ? JSON.parse(adminData) : null;
+        fetchIncidents(connectedAdmin.role,connectedAdmin._id)
+    },[])
 
     useEffect(()=>{
         const authToken = localStorage.getItem('authToken');
@@ -50,11 +70,10 @@ export default function Navbar(){
             r.push('/');
         }else{
             const adminData = localStorage.getItem('admin_user');
-            const payload = adminData ? JSON.parse(adminData) : null;
-            
-            if (payload) {
-                setAdmin(payload);
-                if (payload.role !== 'superadmin' && pathname.startsWith('/cms')) {
+        const connectedAdmin : IAdmin = adminData ? JSON.parse(adminData) : null;
+            if (connectedAdmin) {
+                setAdmin(connectedAdmin);
+                if (connectedAdmin .role !== 'superadmin' && pathname.startsWith('/cms')) {
                     r.push('/dashboard'); // Redirect to login page if not superadmin
                 }
             } else {
@@ -111,6 +130,11 @@ export default function Navbar(){
                             aria-current={isActive('/management') ? 'page' : undefined}
                         >
                             Incident Management
+                            {incidentCount > 0 && (
+                                <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                    {incidentCount}
+                                </span>
+                            )}
                         </Link>
                         <Link 
                             href="/analytics" 
