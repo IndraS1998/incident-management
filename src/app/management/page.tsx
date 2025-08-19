@@ -162,6 +162,7 @@ export default function IncidentManagement() {
     const adminData = localStorage.getItem('admin_user');
     const connectedAdmin : IAdmin = adminData ? JSON.parse(adminData) : null;
     setIsLoading(true);
+    setEditingIncident(null);
     try {
       const res = await fetch(`/api/incidents`, {
         method: "POST",
@@ -556,6 +557,7 @@ export default function IncidentManagement() {
                     {...register("status", { required: true })}
                     className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
                   >
+                    <option value="">Select</option>
                     <option value="resolved">Resolved</option>
                     <option value="closed">Closed</option>
                   </select>
