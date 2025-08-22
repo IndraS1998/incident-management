@@ -42,8 +42,6 @@ export default function AuthPage() {
         alertService.error("Network Error");
         throw new Error(payload.message || 'Login failed');
       }else{
-        console.log(payload.data)
-        alertService.success("Login successful!");
         localStorage.setItem('authToken', "true"); //API returns a token
         localStorage.setItem('admin_user', JSON.stringify(payload.data));
         r.push('/dashboard');

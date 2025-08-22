@@ -196,21 +196,21 @@ export default function IncidentManagement() {
           {/* Filters Section */}
           <div className="bg-white p-4 rounded-lg shadow-md mb-6 border border-[#EAF6FF]">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-[#232528]">Filtres</h2>
+              <h2 className="text-lg font-semibold text-[#232528]">Filter Incidents</h2>
               <button 
                 onClick={() => setIsFilterDisplayed(!isFilterDisplayed)}
                 className="text-sm text-[#232528] hover:text-[#FFA400] focus:outline-none cursor-pointer"
               >
                 {isFilterDisplayed ? (
                   <span className="flex items-center">
-                    Masquer les filtres
+                    Hide filter
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
                     </svg>
                   </span>
                 ) :(
                   <span className="flex items-center">
-                    Afficher les filtres
+                    Show filter
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
@@ -308,7 +308,7 @@ export default function IncidentManagement() {
             )}
           </div>
 
-          {/* Incidents Table */}
+          {/* Aside Table */}
           <div className="flex gap-6 h-full">
             {/* Recent Incidents Panel (Left) */}
             <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer">
@@ -322,6 +322,7 @@ export default function IncidentManagement() {
               </div>
               
               <div className="p-4">
+                {incidents.length > 0?
                 <ul className="space-y-3">
                   {incidents.map((i) => (
                     <li key={i._id} className="p-3 hover:bg-gray-50 rounded-lg transition-colors" onClick={()=>{setIncidentDetail(i)}}>
@@ -366,6 +367,9 @@ export default function IncidentManagement() {
                     </li>
                   ))}
                 </ul>
+                :<div className='text-center text-sm text-gray-900'>
+                  <span>No incident</span>
+                  </div>}
               </div>
             </div>
 
@@ -377,53 +381,56 @@ export default function IncidentManagement() {
                         Pending Incidents
                     </h2>
                 </div>
-                <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-[#EAF6FF]">
-                      <thead className="bg-[#EAF6FF] bg-opacity-30">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Description</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Department</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Room</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Severity</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Reported</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Actions</th>
+                <div className="overflow-x-auto rounded-none">
+                  <table className="min-w-full divide-y divide-[#EAF6FF] rounded-none">
+                    <thead className="bg-[#EAF6FF] bg-opacity-30">
+                      <tr className='rounded-none'>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Description</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Department</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Room</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Severity</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Reported</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    {pendingIncidents.length === 0 && <tbody className="bg-white divide-y divide-[#EAF6FF]">
+                        <tr><td className="px-6 py-4 whitespace-normal break-words text-sm font-medium text-[#232528]">No Incident</td></tr>
+                      </tbody>}
+                    <tbody className="bg-white divide-y divide-[#EAF6FF]">
+                      {pendingIncidents.map((incident) => (
+                        <tr key={incident._id} className="hover:bg-[#EAF6FF] hover:bg-opacity-30">
+                          <td className="px-6 py-4 whitespace-normal break-words text-sm font-medium text-[#232528]">
+                            {incident.description}
+                          </td>
+                          <td className="px-6 py-4 whitespace-normal break-words text-xs font-normal text-[#232528]">
+                            {incident.department.name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-[#232528]">
+                            {incident.building_name} - Floor {incident.floor_number} - Room {incident.room_number}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                  ${incident.severity === IncidentSeverity.CRITICAL ? 'bg-red-100 text-red-800' : 
+                                    incident.severity === IncidentSeverity.HIGH ? 'bg-orange-100 text-orange-800' : 
+                                    incident.severity === IncidentSeverity.MEDIUM ? 'bg-yellow-100 text-yellow-800' : 
+                                    'bg-blue-100 text-blue-800'}`}>
+                              {incident.severity}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                            {timeSince(new Date(incident.created_at))}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm">
+                              <div className="flex justify-start space-x-2">
+                                  <button type="button" onClick={() => setEditingIncident({...incident})} 
+                                    className="px-4 py-2 bg-[#2A2A72] text-white cursor-pointer rounded hover:bg-[#3A3A82] transition-colors"
+                                  >
+                                    Edit
+                                  </button>
+                              </div>
+                          </td>
                         </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-[#EAF6FF]">
-                        {pendingIncidents.map((incident) => (
-                          <tr key={incident._id} className="hover:bg-[#EAF6FF] hover:bg-opacity-30">
-                            <td className="px-6 py-4 whitespace-normal break-words text-sm font-medium text-[#232528]">
-                              {incident.description}
-                            </td>
-                            <td className="px-6 py-4 whitespace-normal break-words text-xs font-normal text-[#232528]">
-                              {incident.department.name}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-[#232528]">
-                              {incident.building_name} - Floor {incident.floor_number} - Room {incident.room_number}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    ${incident.severity === IncidentSeverity.CRITICAL ? 'bg-red-100 text-red-800' : 
-                                      incident.severity === IncidentSeverity.HIGH ? 'bg-orange-100 text-orange-800' : 
-                                      incident.severity === IncidentSeverity.MEDIUM ? 'bg-yellow-100 text-yellow-800' : 
-                                      'bg-blue-100 text-blue-800'}`}>
-                                {incident.severity}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                              {timeSince(new Date(incident.created_at))}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                <div className="flex justify-start space-x-2">
-                                    <button type="button" onClick={() => setEditingIncident({...incident})} 
-                                      className="px-4 py-2 bg-[#2A2A72] text-white cursor-pointer rounded hover:bg-[#3A3A82] transition-colors"
-                                    >
-                                      Edit
-                                    </button>
-                                </div>
-                            </td>
-                          </tr>
-                        ))}
+                      ))}
                     </tbody>
                   </table>
                 </div>
