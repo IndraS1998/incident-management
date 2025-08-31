@@ -20,17 +20,17 @@ enum IncidentType {
 }
 
 enum IncidentSeverity{
-    LOW = 'low',
-    MEDIUM = 'medium',
-    HIGH = 'high',
-    CRITICAL = 'critical'
+  LOW = 'low',
+  MEDIUM = 'medium',
+  HIGH = 'high',
+  CRITICAL = 'critical'
 }
 
 enum IncidentResolutionStatus {
-    PENDING = 'pending',
-    IN_PROGRESS = 'in_progress',
-    RESOLVED = 'resolved',
-    CLOSED = 'closed'
+  PENDING = 'pending',
+  IN_PROGRESS = 'in_progress',
+  RESOLVED = 'resolved',
+  CLOSED = 'closed'
 }
 
 enum ResolutionStrategyType {
@@ -72,7 +72,7 @@ interface IRoom extends Document {
   department_id?: Types.ObjectId | IDepartment;
 }
 
-interface IIncident extends Document {
+export interface IIncident extends Document {
   incident_id: string;
   description: string;
   severity: IncidentSeverity;

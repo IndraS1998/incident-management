@@ -1,141 +1,364 @@
 'use client';
 import { NextPage } from 'next';
-import Head from 'next/head';
+import {useState, useEffect} from 'react';
 import Navbar from '@/components/navbar';
 import Footer from '../../../components/footer/footerComponent';
+import Skeleton from '@/components/skeleton';
+import { useForm } from "react-hook-form";
+import { fetchData } from '@/lib/functions';
+import {
+  LineChart,Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,BarChart,Bar, PieChart, Pie, Cell, Legend,
+} from "recharts";
 
-const Dashboard: NextPage = () => {
+interface Metrics {
+    incidentsThisMonth: number;
+    incidentsLastMonth: number;
+    averageResolutionTime: number;
+    averageResolutionTimePreviousMonth: number;
+    mostCommonIncidentType: string;
+    mostCommonIncidentPercentage: number;
+    highUrgencyIncidents: number;
+    incidentsChangeTendency:number;
+    incidentsChangePercentile:number;
+    resolutionTimeChangeTendency:number;
+}
 
-    // Mock data - will be replaced with real data later
-    const incidents = [
-        { id: 1, title: 'Server Down', type: 'Infrastructure', status: 'Open', urgency: 'High', date: '2023-05-15' },
-        { id: 2, title: 'Login Issues', type: 'Application', status: 'In Progress', urgency: 'Medium', date: '2023-05-14' },
-        { id: 3, title: 'Data Sync Problem', type: 'Database', status: 'Resolved', urgency: 'High', date: '2023-05-13' },
-        { id: 4, title: 'UI Bug', type: 'Application', status: 'Open', urgency: 'Low', date: '2023-05-12' },
-    ];
-
-    const activityLog = [
-        { id: 1, action: 'Incident #3 resolved', user: 'Admin User', time: '2 hours ago' },
-        { id: 2, action: 'New incident reported', user: 'John Doe', time: '5 hours ago' },
-        { id: 3, action: 'Priority changed on incident #1', user: 'Admin User', time: '1 day ago' },
-        { id: 4, action: 'Incident #2 assigned to Tech Team', user: 'System', time: '2 days ago' },
-    ];
-
-  return (
-    <div className="min-h-screen bg-[#EAF6FF]">
-      <Head>
-        <title>Admin Dashboard | Incident Reporting</title>
-      </Head>
-      <Navbar />
-      <main className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold text-[#232528] my-6">Dashboard</h1>
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-main-black-232528 font-semibold mb-2">Total Incidents</h3>
-            <p className="text-3xl font-bold text-primary-2A2A72">24</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-main-black-232528 font-semibold mb-2">Open Incidents</h3>
-            <p className="text-3xl font-bold text-secondary-FFA400">8</p>
-          </div>
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-main-black-232528 font-semibold mb-2">High Urgency</h3>
-            <p className="text-3xl font-bold text-accent-009FFD">5</p>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Incident List */}
-          <div className="lg:col-span-2">
-            <div className="bg-main-white-EAF6FF rounded-lg shadow overflow-hidden">
-              <div className="p-4 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-main-black-232528">Recent Incidents</h2>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-[#2A2A72]">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Title</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Type</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">Urgency</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {incidents.map((incident) => (
-                      <tr key={incident.id} className="hover:bg-[#EAF6FF]">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-main-black-232528">{incident.title}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-main-black-232528">{incident.type}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${incident.status === 'Open' ? 'bg-red-100 text-red-800' : 
-                              incident.status === 'In Progress' ? 'bg-yellow-100 text-yellow-800' : 
-                              'bg-green-100 text-green-800'}`}>
-                            {incident.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${incident.urgency === 'High' ? 'bg-red-100 text-red-800' : 
-                              incident.urgency === 'Medium' ? 'bg-yellow-100 text-yellow-800' : 
-                              'bg-blue-100 text-blue-800'}`}>
-                            {incident.urgency}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Sidebar */}
-          <div className="space-y-6">
-            {/* Charts */}
-            <div className="bg-main-white-EAF6FF rounded-lg shadow p-4">
-              <h2 className="text-lg font-semibold text-main-black-232528 mb-4">Incidents by Type</h2>
-              <div className="h-64 bg-gray-100 rounded flex items-center justify-center text-gray-400">
-                [Pie Chart Placeholder]
-              </div>
-            </div>
-
-            <div className="bg-main-white-EAF6FF rounded-lg shadow p-4">
-              <h2 className="text-lg font-semibold text-main-black-232528 mb-4">Incidents by Status</h2>
-              <div className="h-48 bg-gray-100 rounded flex items-center justify-center text-gray-400">
-                [Bar Chart Placeholder]
-              </div>
-            </div>
-
-            {/* Activity Timeline */}
-            <div className="bg-main-white-EAF6FF rounded-lg shadow overflow-hidden">
-              <div className="p-4 border-b border-gray-200">
-                <h2 className="text-lg font-semibold text-main-black-232528">Recent Activity</h2>
-              </div>
-              <div className="p-4 bg-white">
-                <ul className="space-y-4">
-                  {activityLog.map((activity) => (
-                    <li key={activity.id} className="flex items-start">
-                      <div className="flex-shrink-0 h-8 w-8 rounded-full bg-secondary-FFA400 flex items-center justify-center mr-3">
-                        <span className="text-xs font-bold text-main-black-232528">{activity.user.charAt(0)}</span>
-                      </div>
-                      <div>
-                        <p className="text-sm text-main-black-232528">{activity.action}</p>
-                        <p className="text-xs text-gray-500">{activity.user} • {activity.time}</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
+interface IncidentVolumeDataType {
+  date: string;
+  incidents: number;
 };
 
-export default Dashboard;
+interface IncidentVolumeFormValues {
+  period: string;
+};
+
+interface ResolutionTimeData{
+  incidentType: string;
+  avgResolutionTime: number; // in hours
+}
+
+interface IncidentPercentage{
+    incidentType: string;
+    percentage: number;
+}
+
+const getTrendDirection = (tendency: number): string => {
+  if (tendency > 0) return '↑';
+  if (tendency < 0) return '↓';
+  return '→'; // neutral trend if equal
+};
+
+const COLORS = ["#FFA400", "#009FFD", "#2A2A72", "#EAF6FF", "#232528"]
+
+interface SeverityPoint{
+  date: string;
+  low: number;
+  medium: number;
+  high: number;
+  critical: number;
+};
+
+const Analytics: NextPage = () => {
+    const [metrics, setMetrics] = useState<Metrics | null>(null);
+    const [isMetricsLoading,setMetricsIsLoading] = useState<boolean>(false);
+    const [isIncidentVolumeLoading,setIncidentVolumeIsLoading] = useState<boolean>(false);
+    const [resolutionTime, setResolutionTime] = useState<ResolutionTimeData[]>([]);
+    const [incidentPercentages, setIncidentPercentages] = useState<IncidentPercentage[]>([]);
+    const [severityPoints,setSeverityPoints] = useState<SeverityPoint[]>([])
+
+
+    const { register, watch } = useForm<IncidentVolumeFormValues>({
+        defaultValues: { period: "30d" },
+        mode: "onChange",
+    });
+
+    const incidentVolumePeriod = watch("period");
+    const [incidentVolumeData, setIncidentVolumeData] = useState<IncidentVolumeDataType[]>([]);
+
+    async function getMetrics(){
+        const data = await fetchData('/api/dashboard/metrics',setMetricsIsLoading)
+        if(data){
+            setMetrics(data)
+        }
+    }
+
+    async function getIncidentVolumeData(){
+        const response= await fetchData(`/api/dashboard/incidentVolume?period=${incidentVolumePeriod}`,setIncidentVolumeIsLoading)
+        if(response){
+            setIncidentVolumeData(response.data)
+        }
+    }
+
+    async function getResolutionTimeByIncident(){
+        const response = await fetchData(`/api/dashboard/resolutionTime?period=${incidentVolumePeriod}`, setIncidentVolumeIsLoading);
+        if(response){
+            setResolutionTime(response)
+        }
+    }
+
+    async function getIncidentTypePercentage(){
+        const response = await fetchData(`/api/dashboard/incidentTypePercentage?period=${incidentVolumePeriod}`,setIncidentVolumeIsLoading)
+        if(response){
+            setIncidentPercentages(response)
+        }
+    }
+
+    async function getUrgencyDistribution(){
+        const response = await fetchData(`/api/dashboard/urgencyDistribution?period=${incidentVolumePeriod}`,setIncidentVolumeIsLoading)
+        if(response){
+            setSeverityPoints(response.data)
+        }
+    }
+
+    useEffect(() => {
+        getMetrics();
+    }, []);
+
+    useEffect(()=>{
+        getIncidentVolumeData()
+        getResolutionTimeByIncident()
+        getIncidentTypePercentage()
+        getUrgencyDistribution();
+    },[incidentVolumePeriod])
+
+    
+
+    return (
+        <div className="min-h-screen bg-[#EAF6FF]">
+            <Navbar />
+            <main className="container mx-auto p-4">
+                <h1 className="text-2xl font-bold text-[#232528] mb-6">Analytics Dashboard</h1>
+                {/* Summary Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div className="bg-white p-4 rounded-lg shadow border border-[#EAF6FF]">
+                        <h3 className="text-sm font-medium text-[#232528] mb-1">Total Incidents</h3>
+                        {isMetricsLoading?(
+                            <>
+                                <Skeleton className="h-8 w-20 mb-2" />
+                                <Skeleton className="h-4 w-32" />
+                            </>
+                        ):(
+                            <>
+                                <p className="text-3xl font-bold text-[#2A2A72]">{metrics?.incidentsThisMonth}</p>
+                                <p className={`text-xs ${metrics && (metrics.incidentsChangeTendency < 0) ? 'text-[#009FFD]' : 'text-[#FF4D4F]'} mt-1`}>
+                                    {metrics && getTrendDirection(metrics.incidentsChangeTendency)}
+                                    {metrics && metrics.incidentsChangePercentile} % from last month
+                                </p>
+                            </>
+                        )}
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow border border-[#EAF6FF]">
+                        <h3 className="text-sm font-medium text-[#232528] mb-1">Avg. Resolution</h3>
+                        {isMetricsLoading?(
+                            <>
+                                <Skeleton className="h-8 w-20 mb-2" />
+                                <Skeleton className="h-4 w-32" />
+                            </>
+                        ):(
+                            <>
+                                <p className="text-3xl font-bold text-[#FFA400]">{metrics?.averageResolutionTime} h</p>
+                                <p className={`text-xs ${metrics && (metrics.resolutionTimeChangeTendency < 0)? 'text-[#009FFD]' : 'text-[#FF4D4F]'} mt-1`}>
+                                    {metrics && getTrendDirection(metrics.resolutionTimeChangeTendency)}
+                                    {metrics && Math.abs(metrics.resolutionTimeChangeTendency).toFixed(2)} h from last month
+                                </p>
+                            </>
+                        )}
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow border border-[#EAF6FF]">
+                        <h3 className="text-sm font-medium text-[#232528] mb-1">Most Common Type</h3>
+                        {isMetricsLoading?(
+                            <>
+                                <Skeleton className="h-8 w-20 mb-2" />
+                                <Skeleton className="h-4 w-32" />
+                            </>
+                        ):(
+                            <>
+                                <p className="text-3xl font-bold text-[#009FFD] capitalize">{metrics?.mostCommonIncidentType}</p>
+                                <p className="text-xs text-[#232528] mt-1">{metrics?.mostCommonIncidentPercentage}% of total</p>
+                            </>
+                        )}
+                    </div>
+                    <div className="bg-white p-4 rounded-lg shadow border border-[#EAF6FF]">
+                        <h3 className="text-sm font-medium text-[#232528] mb-1">High Urgency</h3>
+                        {isMetricsLoading?(
+                            <>
+                                <Skeleton className="h-8 w-20 mb-2" />
+                                <Skeleton className="h-4 w-32" />
+                            </>
+                        ):(
+                            <>
+                                <p className="text-3xl font-bold text-[#FFA400]">{metrics?.highUrgencyIncidents}</p>
+                                <p className="text-xs text-[#232528] mt-1">
+                                    {metrics && (metrics.highUrgencyIncidents / metrics.incidentsThisMonth * 100).toFixed(2)} % of total
+                                </p>
+                            </>
+                        )}
+                    </div>
+                </div>
+
+                {/* Incident Volume Over Time */}
+                <div className="bg-white p-6 rounded-lg shadow border border-[#EAF6FF] mb-8">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-semibold text-[#232528]">Incident Volume Over Time</h2>
+                        <form>
+                            <select
+                                {...register("period")}
+                                className="p-2 text-sm border border-[#EAF6FF] rounded cursor-pointer"
+                            >
+                                <option value="7d">Last 7 Days</option>
+                                <option value="30d">Last 30 Days</option>
+                                <option value="90d">Last 90 Days</option>
+                                <option value="1y">Last 1 Year</option>
+                            </select>
+                        </form>
+                    </div>
+                    <div className="h-80 bg-[#EAF6FF] bg-opacity-30 rounded flex items-center justify-center">
+                        {
+                            isIncidentVolumeLoading?<p className="text-gray-400">[Line Chart: Incident trends over selected period]</p>:
+                            (
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <LineChart data={incidentVolumeData}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                                        <YAxis />
+                                        <Tooltip />
+                                        <Line
+                                        type="monotone"
+                                        dataKey="incidents"
+                                        stroke="#009FFD"
+                                        strokeWidth={2}
+                                        dot={{ r: 4 }}
+                                        activeDot={{ r: 6 }}
+                                        />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            )
+                        }
+                    </div>
+                </div>
+
+                {/* Metrics Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Average Resolution Time */}
+                    <div className="bg-white p-6 rounded-lg shadow border border-[#EAF6FF]">
+                        <h2 className="text-lg font-semibold text-[#232528] mb-4">Average Resolution Time</h2>
+                        <div className="h-64 bg-[#EAF6FF] bg-opacity-30 rounded flex items-center justify-center mb-4">
+                            {isIncidentVolumeLoading?
+                            <p className="text-gray-400">[Bar Chart: Resolution time by incident type]</p>:(
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={resolutionTime}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis
+                                        dataKey="incidentType"
+                                        tick={{ fontSize: 12 }}
+                                        tickFormatter={(val) => val.replace("_", " ")}
+                                    />
+                                    <YAxis
+                                        label={{
+                                        value: "Hours",
+                                        angle: -90,
+                                        position: "insideLeft",
+                                        offset: 0,
+                                        style: { textAnchor: "middle", fontSize: 12 },
+                                        }}
+                                    />
+                                    <Tooltip />
+                                    <Bar
+                                        dataKey="avgResolutionTime"
+                                        fill="#2A2A72"
+                                        radius={[4, 4, 0, 0]}
+                                    />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            )}
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-[#232528]">Fastest: {resolutionTime[0]?.incidentType} ({resolutionTime[0]?.avgResolutionTime}h)</span>
+                            <span className="text-[#232528]">Slowest: {resolutionTime[resolutionTime.length - 1]?.incidentType} ({resolutionTime[resolutionTime.length - 1]?.avgResolutionTime}h)</span>
+                        </div>
+                    </div>
+
+                    {/* Incident Type Distribution */}
+                    <div className="bg-white p-6 rounded-lg shadow border border-[#EAF6FF]">
+                        <h2 className="text-lg font-semibold text-[#232528] mb-4">Incident Type Distribution</h2>
+                        <div className="h-64 bg-[#EAF6FF] bg-opacity-30 rounded flex items-center justify-center mb-4">
+                            {isIncidentVolumeLoading?<p className="text-gray-400">[Pie Chart: Breakdown by incident type]</p>:
+                            (
+                                <ResponsiveContainer width="100%" height={300}>
+                                    <PieChart>
+                                        <Pie
+                                            data={incidentPercentages}
+                                            dataKey="percentage"
+                                            nameKey="incidentType"
+                                            cx="50%"
+                                            cy="50%"
+                                            outerRadius={100}
+                                            fill="#8884d8"
+                                            label
+                                        >
+                                        {incidentPercentages.map((_, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                        </Pie>
+                                        <Tooltip />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-sm mt-4">
+                            {incidentPercentages.map((item, index) => (
+                            <div key={item.incidentType} className="flex items-center">
+                                <span
+                                 className="w-3 h-3 mr-2 rounded-sm"
+                                 style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                                ></span>
+                                <span className='capitalize'>
+                                 {item.incidentType} ({item.percentage}%)
+                                </span>
+                            </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Urgency Level Distribution */}
+                    <div className="bg-white p-6 rounded-lg shadow border border-[#EAF6FF] lg:col-span-2">
+                        <h2 className="text-lg font-semibold text-[#232528] mb-4">Urgency Level Distribution</h2>
+                        <div className="h-64 bg-[#EAF6FF] bg-opacity-30 rounded flex items-center justify-center mb-4">
+                            {
+                                isIncidentVolumeLoading?<p className="text-gray-400">[Stacked Bar Chart: Urgency distribution over time]</p>:
+                                (
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={severityPoints}>
+                                        <CartesianGrid strokeDasharray="3 3" />
+                                        <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                                        <YAxis />
+                                        <Tooltip />
+                                        <Legend />
+                                        {/* colors from your palette */}
+                                        <Bar dataKey="critical" stackId="a" fill="#ef4444" /> {/* red for critical */}
+                                        <Bar dataKey="high"     stackId="a" fill="#FFA400" /> {/* secondary */}
+                                        <Bar dataKey="medium"   stackId="a" fill="#009FFD" /> {/* accent */}
+                                        <Bar dataKey="low"      stackId="a" fill="#2A2A72" /> {/* primary */}
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                )
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                {/* Export Section */}
+                <div className="mt-8 flex justify-end">
+                    <button className="px-4 py-2 cursor-pointer bg-[#2A2A72] text-white rounded hover:bg-[#3A3A82] transition-colors flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                        Export Report
+                    </button>
+                </div>
+            </main>
+            <Footer />
+        </div>
+    )};
+
+export default Analytics;

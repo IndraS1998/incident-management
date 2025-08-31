@@ -40,8 +40,8 @@ export async function fetchData(url:string,loader:(val:boolean)=>void){
     try{
         const response = await fetch(url)
         if(!response.ok){
-            alertService.error("Oops! something went wrong")
-            return null
+          alertService.error("Oops! something went wrong")
+          return null
         }
         const data = await response.json()
         return data

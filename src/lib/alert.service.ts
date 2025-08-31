@@ -13,19 +13,19 @@ const defaultOptions: ToastOptions = {
 };
 
 export const alertService = {
-  success: (message: string, options?: ToastOptions) => {
-    toast.success(message, { ...defaultOptions, ...options });
-  },
-  error: (message: string, options?: ToastOptions) => {
-    toast.error(message, { ...defaultOptions, ...options });
-  },
-  info: (message: string, options?: ToastOptions) => {
-    toast.info(message, { ...defaultOptions, ...options });
-  },
-  warning: (message: string, options?: ToastOptions) => {
-    toast.warning(message, { ...defaultOptions, ...options });
-  },
-  dismiss: (id?: string) => {
-    toast.dismiss(id);
-  }
+    success: (message: string, options?: ToastOptions) => {
+      toast.success(message, { ...defaultOptions, ...options });
+    },
+    error: (message: string, options?: ToastOptions) => {
+      toast.error(message, { ...defaultOptions, ...options });
+    },
+    info: (message: string, options?: ToastOptions) => {
+      toast.info(message, { ...defaultOptions, ...options });
+    },
+    warning: (message: string, options?: ToastOptions) => {
+      toast.warning(message, { ...defaultOptions, ...options });
+    },
+    dismiss: (id?: string) => {
+      toast.dismiss(id);
+    }
 };

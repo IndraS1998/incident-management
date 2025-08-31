@@ -136,15 +136,6 @@ export default function Navbar(){
                                 </span>
                             )}
                         </Link>
-                        <Link 
-                            href="/analytics" 
-                            className={`hover:text-[#FFA400]/80 transition-colors duration-200 font-medium ${
-                                isActive('/analytics') ? 'text-[#FFA400]' : ''
-                            }`}
-                            aria-current={isActive('/analytics') ? 'page' : undefined}
-                        >
-                            Analytics
-                        </Link>
                         {
                             admin?.role === 'superadmin' && (
                                 <div className="flex items-center space-x-4">
