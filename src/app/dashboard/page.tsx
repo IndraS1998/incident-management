@@ -48,7 +48,7 @@ const getTrendDirection = (tendency: number): string => {
   return '→'; // neutral trend if equal
 };
 
-const COLORS = ["#FFA400", "#009FFD", "#2A2A72", "#EAF6FF", "#232528"]
+const COLORS = ["#FFA400", "#009FFD", "#2A2A72", "#F15BB5", "#232528"]
 
 interface SeverityPoint{
   date: string;
@@ -142,7 +142,7 @@ const Analytics: NextPage = () => {
                                 <p className="text-3xl font-bold text-[#2A2A72]">{metrics?.incidentsThisMonth}</p>
                                 <p className={`text-xs ${metrics && (metrics.incidentsChangeTendency < 0) ? 'text-[#009FFD]' : 'text-[#FF4D4F]'} mt-1`}>
                                     {metrics && getTrendDirection(metrics.incidentsChangeTendency)}
-                                    {metrics && metrics.incidentsChangePercentile} % from last month
+                                    {metrics && metrics.incidentsChangePercentile.toFixed(2)} % from last month
                                 </p>
                             </>
                         )}
@@ -334,11 +334,10 @@ const Analytics: NextPage = () => {
                                         <YAxis />
                                         <Tooltip />
                                         <Legend />
-                                        {/* colors from your palette */}
-                                        <Bar dataKey="critical" stackId="a" fill="#ef4444" /> {/* red for critical */}
-                                        <Bar dataKey="high"     stackId="a" fill="#FFA400" /> {/* secondary */}
-                                        <Bar dataKey="medium"   stackId="a" fill="#009FFD" /> {/* accent */}
-                                        <Bar dataKey="low"      stackId="a" fill="#2A2A72" /> {/* primary */}
+                                        <Bar dataKey="critical" stackId="a" fill="#e76f51" /> {/* red for critical */}
+                                        <Bar dataKey="high"     stackId="a" fill="#f4a261" /> {/* secondary */}
+                                        <Bar dataKey="medium"   stackId="a" fill="#e9c46a" /> {/* accent */}
+                                        <Bar dataKey="low"      stackId="a" fill="#2a9d8f" /> {/* primary */}
                                         </BarChart>
                                     </ResponsiveContainer>
                                 )

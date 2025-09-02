@@ -15,6 +15,12 @@ enum IncidentType {
   OTHER = 'other'
 }
 
+enum ResolutionStrategyType {
+  WORKAROUND = 'workaround',
+  LONG_TERM_SOLUTION = 'long_term_solution',
+  TEMPORARY_FIX = 'temporary_fix',
+}
+
 enum IncidentSeverity{
   LOW = 'low',
   MEDIUM = 'medium',
@@ -91,7 +97,7 @@ export default function IncidentManagement() {
   const [pendingIncidents,setPendingIncidents] = useState<Incident[]>([]);
   const [isLoading,setIsLoading] = useState<boolean>(false);
   const [refreshCount,setRefreshCount] = useState<number>(0);
-  const { register, handleSubmit, watch, reset } = useForm<IncidentUpdateFormProps>();
+  const { register, handleSubmit, watch, reset, setValue } = useForm<IncidentUpdateFormProps>();
   const status = watch("status");
 
   const [filters, setFilters] = useState({
@@ -549,7 +555,14 @@ export default function IncidentManagement() {
           <div className="fixed inset-0 backdrop-blur-lg flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl border border-[#EAF6FF]">
               <div className="flex justify-between items-start mb-4">
-                  <h2 className="text-xl font-bold text-[#232528]">Resolve the Incident</h2>
+                  <div className="mb-4">
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Resolve Incident
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {editingIncident.description}
+                    </p>
+                  </div>
                   <button onClick={() => setEditingIncident(null)} className="text-[#232528] hover:text-[#FFA400] cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -573,9 +586,26 @@ export default function IncidentManagement() {
                 {/* Resolution Fields (only if Resolved) */}
                 {status === "resolved" && (
                   <>
+                    {/* AI Suggest Button */}
+                    <div className="flex justify-start mb-2">
+                      <button
+                        onClick={()=>{
+                          setValue("incident_type", IncidentType.OTHER);
+                          setValue("resolution_strategy_type", ResolutionStrategyType.LONG_TERM_SOLUTION);
+                          setValue("diagnosis", 'Tentative test diagnosis');
+                          setValue("measure", 'Tentative measure');
+                          setValue("recommendation", 'Tentative recommendation');
+                        }}
+                        type="button"
+                        className="px-3 py-1.5 cursor-pointer text-sm font-medium rounded-md bg-[#FFA400] text-white hover:bg-[#e69500] transition"
+                      >
+                        ✨ Let AI Suggest
+                      </button>
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium mb-1">Incident Type</label>
-                      <select {...register("incident_type")} className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none">
+                      <select {...register("incident_type", { required: true })} className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none">
                         <option value="software">Software</option>
                         <option value="hardware">Hardware</option>
                         <option value="network">Network</option>
@@ -586,8 +616,7 @@ export default function IncidentManagement() {
 
                     <div>
                       <label className="block text-sm font-medium mb-1">Resolution Strategy</label>
-                      <select
-                        {...register("resolution_strategy_type")}
+                      <select {...register("resolution_strategy_type")}
                         className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
                       >
                         <option value="immediate_fix">Immediate Fix</option>
