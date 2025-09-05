@@ -97,8 +97,9 @@ export default function IncidentManagement() {
   const [pendingIncidents,setPendingIncidents] = useState<Incident[]>([]);
   const [isLoading,setIsLoading] = useState<boolean>(false);
   const [refreshCount,setRefreshCount] = useState<number>(0);
-  const { register, handleSubmit, watch, reset, setValue } = useForm<IncidentUpdateFormProps>();
+  const { register, handleSubmit, watch, reset, setValue , formState: { errors, isValid }} = useForm<IncidentUpdateFormProps>();
   const status = watch("status");
+  const [aiSuggested,setAiSuggested] = useState<boolean>(false);
 
   const [filters, setFilters] = useState({
     status: '',
@@ -588,41 +589,44 @@ export default function IncidentManagement() {
                   <>
                     {/* AI Suggest Button */}
                     <div className="flex justify-start mb-2">
-                      <button
-                        onClick={()=>{
-                          setValue("incident_type", IncidentType.OTHER);
-                          setValue("resolution_strategy_type", ResolutionStrategyType.LONG_TERM_SOLUTION);
-                          setValue("diagnosis", 'Tentative test diagnosis');
-                          setValue("measure", 'Tentative measure');
-                          setValue("recommendation", 'Tentative recommendation');
-                        }}
-                        type="button"
+                      <button onClick={()=>{
+                          setValue("incident_type", IncidentType.OTHER,{ shouldValidate: true, shouldDirty: true });
+                          setValue("resolution_strategy_type", ResolutionStrategyType.LONG_TERM_SOLUTION,{ shouldValidate: true, shouldDirty: true });
+                          setValue("diagnosis", 'Tentative test diagnosis',{ shouldValidate: true, shouldDirty: true });
+                          setValue("measure", 'Tentative measure',{ shouldValidate: true, shouldDirty: true });
+                          setValue("recommendation", 'Tentative recommendation',{ shouldValidate: true, shouldDirty: true });
+                          setAiSuggested(true);
+                        }} type="button"
                         className="px-3 py-1.5 cursor-pointer text-sm font-medium rounded-md bg-[#FFA400] text-white hover:bg-[#e69500] transition"
                       >
-                        ✨ Let AI Suggest
+                        ✨ {aiSuggested ? "Suggest another solution" : "Let AI Suggest"}
                       </button>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium mb-1">Incident Type</label>
                       <select {...register("incident_type", { required: true })} className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none">
+                        <option value="">Select Incident Type</option>
                         <option value="software">Software</option>
                         <option value="hardware">Hardware</option>
                         <option value="network">Network</option>
                         <option value="security">Security</option>
                         <option value="other">Other</option>
                       </select>
+                      {errors.incident_type && <p className="text-red-500 text-xs mt-1">{errors.incident_type.message}</p>}
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium mb-1">Resolution Strategy</label>
-                      <select {...register("resolution_strategy_type")}
+                      <select {...register("resolution_strategy_type",{required: true})}
                         className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
                       >
+                        <option value="">Select Resolution Strategy</option>
                         <option value="immediate_fix">Immediate Fix</option>
                         <option value="workaround">Workaround</option>
                         <option value="long_term_solution">Long Term Solution</option>
                       </select>
+                      {errors.resolution_strategy_type && <p className='text-red-500 text-xs mt-1'>{errors.resolution_strategy_type.message}</p>}
                     </div>
 
                     <div>
@@ -632,15 +636,17 @@ export default function IncidentManagement() {
                         className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
                         rows={3}
                       />
+                      {errors.diagnosis && <p className='text-red-500 text-xs mt-1'>{errors.diagnosis.message}</p>}
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium mb-1">Measures Taken</label>
                       <textarea
-                        {...register("measure")}
+                        {...register("measure",{required : true})}
                         className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
                         rows={2}
                       />
+                      {errors.measure && <p className='text-red-500 text-xs mt-1'>{errors.measure.message}</p>}
                     </div>
 
                     <div>
@@ -655,13 +661,24 @@ export default function IncidentManagement() {
                 )}
 
                 {/* Submit */}
-                <button
+                {isValid?(
+                  <button
                   type="submit"
                   disabled={isLoading}
                   className="w-full rounded-md bg-[#2A2A72] text-white py-2 hover:bg-[#2A2A72]/90 disabled:opacity-50 cursor-pointer"
                 >
                   {isLoading ? "Updating..." : "Update Incident"}
                 </button>
+                ):(
+                  <button
+                  type="submit"
+                  disabled={true}
+                  className="w-full rounded-md bg-gray-300 text-gray-500 py-2  cursor-disabled"
+                >
+                  {isLoading ? "Updating..." : "Update Incident"}
+                </button>
+                )}
+                
               </form>
             </div>
           </div>
@@ -669,5 +686,5 @@ export default function IncidentManagement() {
         </main>
       </div>
     <Footer />
-    </>
+  </>
 )};
