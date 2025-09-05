@@ -125,6 +125,7 @@ export async function GET() {
     // 6. Number of high urgency incidents (all time)
     const highUrgencyIncidents = await Incident.countDocuments({
       severity: { $in: ["high", "critical"] },
+      created_at: { $gte: startOfMonth, $lte: now },
     });
 
     const incidentsChangeTendency = incidentsThisMonth - incidentsLastMonth

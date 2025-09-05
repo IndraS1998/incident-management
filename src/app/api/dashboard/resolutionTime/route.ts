@@ -7,6 +7,8 @@ function getStartDate(period: string | null): Date | null {
   if (!period) return null;
 
   switch (period) {
+    case '7d':
+      return new Date(now.setDate(now.getDate() - 7));
     case "30d":
       return new Date(now.setDate(now.getDate() - 30));
     case "90d":

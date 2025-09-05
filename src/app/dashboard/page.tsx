@@ -148,7 +148,7 @@ const Analytics: NextPage = () => {
                         )}
                     </div>
                     <div className="bg-white p-4 rounded-lg shadow border border-[#EAF6FF]">
-                        <h3 className="text-sm font-medium text-[#232528] mb-1">Avg. Resolution</h3>
+                        <h3 className="text-sm font-medium text-[#232528] mb-1">Avgerage Resolution</h3>
                         {isMetricsLoading?(
                             <>
                                 <Skeleton className="h-8 w-20 mb-2" />
@@ -189,7 +189,7 @@ const Analytics: NextPage = () => {
                             <>
                                 <p className="text-3xl font-bold text-[#FFA400]">{metrics?.highUrgencyIncidents}</p>
                                 <p className="text-xs text-[#232528] mt-1">
-                                    {metrics && (metrics.highUrgencyIncidents / metrics.incidentsThisMonth * 100).toFixed(2)} % of total
+                                    {metrics && ((metrics.highUrgencyIncidents / metrics.incidentsThisMonth) * 100).toFixed(2)} % of total incidents reported this month
                                 </p>
                             </>
                         )}
