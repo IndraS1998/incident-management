@@ -15,11 +15,14 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url);
     const period = searchParams.get("period") || "30d"; // default = 30 days
+    console.log(period)
 
     let startDate: Date;
 
     if (period === "30d") {
       startDate = subDays(new Date(), 30);
+    }else if (period === "7d") {
+      startDate = subDays(new Date(), 7);
     } else if (period === "90d") {
       startDate = subDays(new Date(), 90);
     } else if (period === "6m") {
