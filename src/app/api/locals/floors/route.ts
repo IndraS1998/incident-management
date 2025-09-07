@@ -11,7 +11,14 @@ export async function GET(request: Request) {
         if (buildingName) {
             floors = await Floor.find({ building_name: buildingName }).lean();
         } else {
-            floors = await Floor.find().lean();
+            floors = await Floor.aggregate([
+                {
+                    $group: {
+                    _id: "$building_name",
+                    floors: { $push: "$$ROOT" },
+                    },
+                },
+            ]);
         }
         return NextResponse.json(floors);
     } catch (error) {

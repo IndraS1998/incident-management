@@ -2,20 +2,33 @@
 import {useForm} from 'react-hook-form';
 import { useState,useEffect } from 'react';
 import { alertService } from '@/lib/alert.service';
-import LocalsTable from './table';
-import {LocalEntity, IFloor} from '@/lib/types/cms.types';
 import TableSkeleton from './skeleton';
+import React from 'react';
 
 type modalMode = 'create' | 'edit';
 
+interface Floor {
+  _id: string;
+  floor_number: number;
+  building_name: string;
+}
+
+interface BuildingGroup {
+  _id: string; 
+  building_name:string;
+  floors: Floor[];
+}
+
 export default function Floors(){
-    const [floors, setFloors] = useState<LocalEntity[]>([]);
+    const [data, setData] = useState<BuildingGroup[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
     const [modalState, setModalState] = useState<{
         open: boolean;
         mode: modalMode;
-        FloorData: LocalEntity | null;
+        FloorData: Floor | null;
     }>({
         open: false,
         mode: 'create',
@@ -33,11 +46,7 @@ export default function Floors(){
                 return;
             }
             const data = await res.json();
-            const floorsWithType: IFloor[] = data.map((floor: Omit<IFloor, 'type'>) => ({
-                ...floor,
-                type: 'floor'
-            }));
-            setFloors(floorsWithType);
+            setData(data)
         } catch (err) {
             alertService.error('Failed to fetch floors');
             setError(err instanceof Error ? err.message : 'Unknown error');
@@ -50,11 +59,17 @@ export default function Floors(){
         fetchFloors();
     }, []);
 
-    const handleEdit = (floor: LocalEntity) => {
+     // Pagination logic
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentBuildings = data.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(data.length / itemsPerPage)
+
+    const handleEdit = (floor: Floor) => {
         setModalState({
             open: true,
             mode: 'edit',
-            FloorData: floor // This will have floor_number available
+            FloorData: floor 
         });
     };
 
@@ -75,15 +90,70 @@ export default function Floors(){
 
     return(
        <>
-            <LocalsTable 
-                tabBody={floors.map(floor => [floor._id, floor.building_name,floor.type==='floor'?floor.floor_number.toString(): ''])}
-                tabHead={['ID', 'Building', 'Floor Number']} 
-                tabTitle='Floors' 
-                buttonText='floor' 
-                setCreationModal={() => setModalState({ FloorData: null, mode: 'create', open: true })}
-                setEditModal={(floor: LocalEntity) => handleEdit(floor)}
-                entityType='floor'
-            />
+            {/* Add New Button */}
+            <div className="mt-2 mb-2 flex justify-start">
+                <button onClick={() => setModalState({ open: true, mode: 'create', FloorData: null })}
+                 className="px-4 py-2 bg-[#FFA400] hover:bg-[#e69500] text-white font-medium rounded-md capitalize cursor-pointer">
+                    + Add New Floor
+                </button>
+            </div>
+            <div className="bg-white rounded-lg shadow-sm border border-[#EAF6FF] overflow-x-auto w-full">
+                <table className="min-w-full border border-gray-200 rounded-lg shadow-sm">
+                    <thead className="bg-[#2A2A72] text-[#EAF6FF] bg-opacity-30 text-sm uppercase">
+                        <tr>
+                            <th className="px-4 py-2 text-left">Floor ID</th>
+                            <th className="px-4 py-2 text-left">Floor Number</th>
+                            <th className="px-4 py-2 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {currentBuildings.map((group) => (
+                        <React.Fragment key={group._id}>
+                            {/* Building header row */}
+                            <tr key={group._id} className="bg-[#EAF6FF] font-semibold">
+                                <td colSpan={3} className="px-4 py-2 font-bold text-gray-900">
+                                {group._id}
+                                </td>
+                            </tr>
+
+                            {/* Floors under this building */}
+                            {group.floors.map((floor) => (
+                                <tr key={floor._id} className="border-t hover:bg-gray-50 transition">
+                                    <td className="px-4 py-2">{floor._id}</td>
+                                    <td className="px-4 py-2">{floor.floor_number}</td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-[#232528]">
+                                        <div className="flex space-x-2">
+                                            <button onClick={() =>{handleEdit(floor)}}
+                                                className="text-[#FFA400] hover:text-[#e69500] cursor-pointer">
+                                                Edit
+                                            </button>
+                                            <button className="text-red-500 hover:text-red-700 cursor-pointer">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </ React.Fragment>
+                    ))}
+                    </tbody>
+                </table>
+
+                {/* Pagination controls */}
+                <div className="flex justify-between items-center mt-4">
+                    <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}
+                        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">
+                        Previous
+                    </button>
+                    <p className="text-sm text-gray-600">
+                        Page {currentPage} of {totalPages}
+                    </p>
+                    <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}
+                        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">
+                        Next
+                    </button>
+                </div>
+            </div>
 
             {modalState.open && (
                 <ModalContent onClose={() => setModalState({ ...modalState, FloorData: null, open: false })} refreshBuildings={fetchFloors}
@@ -97,20 +167,20 @@ function ModalContent({ onClose, refreshBuildings, mode = 'create', floorData = 
   onClose: () => void;
   refreshBuildings: () => void;
   mode?: modalMode;
-  floorData?: LocalEntity | null;
+  floorData?: Floor | null;
 }){
-    const [buildings,setBuildings] = useState<LocalEntity[]>([]);
+    const [buildings,setBuildings] = useState<BuildingGroup[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
-    const { register, handleSubmit, formState: { errors } } = useForm<LocalEntity>({
+    const { register, handleSubmit, formState: { errors } } = useForm<Floor>({
         defaultValues:{
             _id: floorData ? floorData._id : '',
             building_name: floorData ? floorData.building_name : '',
-            floor_number: floorData ? (floorData.type === 'floor' ? floorData.floor_number : 0) : 0, // Default to 0 if not provided
+            floor_number: floorData ? floorData.floor_number : 0,
         }
     });
 
-    const onSubmit = async (data: LocalEntity) => {
+    const onSubmit = async (data: Floor) => {
         setLoading(true)
         const method = mode === 'create' ? 'POST' : 'PATCH';
         try {

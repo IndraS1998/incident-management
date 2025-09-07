@@ -4,12 +4,10 @@ import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import { fetchData } from '@/lib/functions';
 import { 
-  Cog6ToothIcon, 
-  ArrowLeftOnRectangleIcon,
-  ChevronDownIcon ,
-  BuildingOffice2Icon
+  Cog6ToothIcon, ArrowLeftOnRectangleIcon, ChevronDownIcon ,BuildingOffice2Icon,Bars3Icon, XMarkIcon
 } from '@heroicons/react/24/outline';
 import { UserCircleIcon,Squares2X2Icon } from '@heroicons/react/24/solid';
+import { Transition } from "@headlessui/react";
 
 
 // Interfaces
@@ -40,8 +38,10 @@ export default function Navbar(){
 
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isContentManagementOpen,setIsContentManagenentOpen] = useState(false)
+    const [contentMobileMode,setContentMobileMode] = useState(false)
     const [incidentCount,setIncidentcount] = useState<number>(0)
     const [isLoading,setIsLoading] = useState<boolean>(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const dropdownSettingsRef = useRef<HTMLDivElement>(null);
     const dropdownContentManagementRef = useRef<HTMLDivElement>(null);
@@ -112,8 +112,87 @@ export default function Navbar(){
          <header className="bg-[#2A2A72] text-white p-4 shadow-md">
             <div className="container mx-auto flex justify-between items-center">
                 <div className="flex items-center space-x-8">
+                    {/* Mobile view */}
+
+                    {/* Mobile Hamburger */}
+                    <div className="lg:hidden">
+                        <button onClick={() => setIsMenuOpen(true)}>
+                            <Bars3Icon className="h-6 w-6 text-white" />
+                        </button>
+                    </div>
+                    {/* Mobile Dropdown Menu */}
+                    <Transition
+                        show={isMenuOpen}
+                        enter="transition transform duration-300 ease-out"
+                        enterFrom="translate-x-full opacity-0"
+                        enterTo="translate-x-0 opacity-100"
+                        leave="transition transform duration-200 ease-in"
+                        leaveFrom="translate-x-0 opacity-100"
+                        leaveTo="translate-x-full opacity-0"
+                    >
+                        <div className="fixed inset-0 z-50 bg-white shadow-md lg:hidden flex flex-col">
+                            {/* Sticky header with close button */}
+                            <div className="sticky top-0 flex justify-end p-4 bg-white border-b">
+                                <button onClick={() => setIsMenuOpen(false)}>
+                                    <XMarkIcon className="h-6 w-6 text-[#2A2A72]" />
+                                </button>
+                            </div>
+
+                            <nav className="flex-1 overflow-y-auto flex flex-col space-y-4 p-6 text-gray-700">
+                                <Link href="/dashboard" onClick={() => setIsMenuOpen(false)}
+                                className={`hover:text-[#FFA400] transition-colors duration-200 font-medium ${
+                                    isActive("/dashboard") ? "text-[#FFA400]" : ""
+                                }`}>
+                                    Dashboard
+                                </Link>
+
+                                <Link href="/management" onClick={() => setIsMenuOpen(false)}
+                                    className={`hover:text-[#FFA400]/80 transition-colors duration-200 font-medium ${
+                                        isActive("/management") ? "text-[#FFA400]" : ""
+                                    }`}>
+                                    Incident Management
+                                    {incidentCount > 0 && (
+                                        <span className="ml-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                        {incidentCount}
+                                        </span>
+                                    )}
+                                </Link>
+
+                                {admin?.role === "superadmin" && (
+                                <div>
+                                    <button
+                                        onClick={() => setContentMobileMode(!contentMobileMode)}
+                                        className="flex items-center space-x-2 w-full font-medium hover:text-[#FFA400]"
+                                    >
+                                        <span>Content Management</span>
+                                        <ChevronDownIcon
+                                            className={`h-4 w-4 transition-transform ${contentMobileMode ? "rotate-180" : ""
+                                            }`}
+                                        />
+                                    </button>
+
+                                    {contentMobileMode && (
+                                    <div className="mt-2 space-y-2 pl-4">
+                                        <Link href="/cms/administrators" onClick={() => setIsMenuOpen(false)} className="block text-sm text-gray-700 hover:text-[#FFA400]">
+                                            Administrators
+                                        </Link>
+                                        <Link href="/cms/locals" onClick={() => setIsMenuOpen(false)} className="block text-sm text-gray-700 hover:text-[#FFA400]">
+                                            Locals
+                                        </Link>
+                                        <Link href="/cms/departments" onClick={() => setIsMenuOpen(false)} className="block text-sm text-gray-700 hover:text-[#FFA400]">
+                                            Departments
+                                        </Link>
+                                    </div>
+                                    )}
+                                </div>
+                                )}
+                            </nav>
+                        </div>
+                    </Transition>
                     <h1 className="text-2xl font-bold">Incident Reporting</h1>
-                    <nav className="hidden md:flex items-center space-x-6">
+
+                    {/* Desktop view */}
+                    <nav className="hidden lg:flex items-center space-x-6">
                         <Link href="/dashboard" 
                             className={`hover:text-[#FFA400] transition-colors duration-200 font-medium ${
                                 isActive('/dashboard') ? 'text-[#FFA400]' : ''
