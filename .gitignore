@@ -10,6 +10,11 @@
 !.yarn/releases
 !.yarn/versions
 
+# api-keys
+.env*.local
+.env.development
+.env.production
+
 # testing
 /coverage
 
