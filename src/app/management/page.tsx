@@ -7,6 +7,7 @@ import { timeSince } from '@/lib/functions';
 import { alertService } from '@/lib/alert.service';
 import { useForm } from "react-hook-form";
 import { IncidentInfo,getAISuggestion,AISuggestion } from '@/lib/ai.service';
+import { set } from 'mongoose';
 
 enum IncidentType {
   SOFTWARE = 'software',
@@ -177,6 +178,7 @@ export default function IncidentManagement() {
       alertService.success('Successfully Updated Incident');
       setRefreshCount(()=>(refreshCount + 1))
       reset();
+      setAiSuggested(false);
     } catch (err) {
       console.error(err);
       alertService.error('Failed to update Incident')
@@ -551,7 +553,7 @@ export default function IncidentManagement() {
           {editingIncident && (
           <div className="fixed inset-0 backdrop-blur-lg flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl border border-[#EAF6FF]">
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex justify-between items-start mb-1">
                   <div className="mb-4">
                     <h2 className="text-2xl font-bold text-gray-900">
                       Resolve Incident
@@ -562,6 +564,7 @@ export default function IncidentManagement() {
                   </div>
                   <button onClick={() => {
                       reset()
+                      setAiSuggested(false)
                       setEditingIncident(null)
                     }} className="text-[#232528] hover:text-[#FFA400] cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -587,6 +590,7 @@ export default function IncidentManagement() {
                 {status === "resolved" && (
                   <>
                     {/* AI Suggest Button */}
+                    {!aiSuggested && (
                     <div className="flex justify-start mb-2">
                       <button onClick={async ()=>{
                           const incidentInfo : IncidentInfo = {
@@ -614,20 +618,19 @@ export default function IncidentManagement() {
                             setValue("diagnosis", suggestion.diagnosis,{ shouldValidate: true, shouldDirty: true });
                             setValue("recommendation", suggestion.recommendation,{ shouldValidate: true, shouldDirty: true });
                             setValue("measure", suggestion.measure.join('\n'),{ shouldValidate: true, shouldDirty: true });
+                            setAiSuggested(true)
                           }catch(error){
                             console.log(error)
                             alertService.error('Failed to get AI suggestion. Please try again later')
                           }finally{
                             setAiSuggestionLoading(false);
                           }
-                          /*
-                          setAiSuggested(true);*/
                         }} type="button"
                         className="px-3 py-1.5 cursor-pointer text-sm font-medium rounded-md bg-[#FFA400] text-white hover:bg-[#e69500] transition"
                       >
-                        {aiSuggestionLoading ? "Loading..." : "✨ " + (aiSuggested ? "Suggest another solution" : "Let AI Suggest")}
+                        {aiSuggestionLoading ? "Loading..." : "✨ Let AI Suggest"}
                       </button>
-                    </div>
+                    </div>)}
 
                     <div>
                       <label className="block text-sm font-medium mb-1">Incident Type</label>
