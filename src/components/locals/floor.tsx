@@ -240,7 +240,7 @@ function ModalContent({ onClose, refreshBuildings, mode = 'create', floorData = 
                     </div>
                 )}
                 <div className="bg-[#2A2A72] text-white px-6 py-3 rounded-t-lg flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">{mode === 'create' ? 'Add New Building' : 'Edit Building'}</h3>
+                    <h3 className="text-lg font-semibold">{mode === 'create' ? 'Add New Floor' : 'Edit Floor'}</h3>
                     <button onClick={onClose} className="text-white hover:text-[#FFA400] cursor-pointer">
                         ✕
                     </button>

@@ -73,7 +73,7 @@ export default function Rooms(){
     useEffect(() => {
         fetchRooms();
     }, []);
-
+    /*
     const handleEdit = (floor: LocalEntity) => {
         setModalState({
             open: true,
@@ -81,7 +81,7 @@ export default function Rooms(){
             RoomData: floor // This will have floor_number available
         });
     };
-
+    */
     if (loading){
         return (
             <div className="space-y-6">
@@ -100,7 +100,13 @@ export default function Rooms(){
     return(
        <>
             <div className="mt-2 mb-2 flex justify-start">
-                <button onClick={() => {}}
+                <button onClick={() => {
+                    setModalState({
+                        open: true,
+                        mode: 'create',
+                        RoomData: null // This will have floor_number available
+                    });
+                }}
                     className="px-4 py-2 bg-[#FFA400] hover:bg-[#e69500] text-white font-medium rounded-md capitalize cursor-pointer">
                     + Add New Room
                 </button>
@@ -299,7 +305,7 @@ function ModalContent({ onClose, refreshBuildings, mode = 'create', roomData = n
                     </div>
                 )}
                 <div className="bg-[#2A2A72] text-white px-6 py-3 rounded-t-lg flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">{mode === 'create' ? 'Add New Building' : 'Edit Building'}</h3>
+                    <h3 className="text-lg font-semibold">{mode === 'create' ? 'Add New Room' : 'Edit Room'}</h3>
                     <button onClick={onClose} className="text-white hover:text-[#FFA400] cursor-pointer">
                         ✕
                     </button>
