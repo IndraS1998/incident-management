@@ -2,16 +2,38 @@
 import {useForm} from 'react-hook-form';
 import { useState,useEffect,useCallback } from 'react';
 import { alertService } from '@/lib/alert.service';
-import LocalsTable from './table';
-import {LocalEntity, IRoom, IFloor} from '@/lib/types/cms.types';
+import {LocalEntity,IFloor} from '@/lib/types/cms.types';
 import TableSkeleton from './skeleton';
+import React from 'react';
 
 type modalMode = 'create' | 'edit';
 
+interface Department{
+    _id:string;
+    department_id:string;
+}
+interface Room{
+    _id:string;
+    department_id:Department | null;
+    room_number:string;
+}
+
+interface Floor{
+    floor_number:number;
+    rooms:Room[];
+}
+
+interface RoomWithHierarchy{
+    building_name:string;
+    floors:Floor[];
+}
+
 export default function Rooms(){
-    const [rooms, setRooms] = useState<LocalEntity[]>([]);
+    const [rooms, setRooms] = useState<RoomWithHierarchy[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
     const [modalState, setModalState] = useState<{
         open: boolean;
         mode: modalMode;
@@ -21,6 +43,12 @@ export default function Rooms(){
         mode: 'create',
         RoomData: null
     });
+
+    // Pagination logic
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentRooms = rooms.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(rooms.length / itemsPerPage)
 
      // Fetch rooms
     const fetchRooms = async () => {
@@ -33,11 +61,7 @@ export default function Rooms(){
                 return;
             }
             const data = await res.json();
-            const roomsWithType: IRoom[] = data.map((room: Omit<IRoom, 'type'>) => ({
-                ...room,
-                type: 'room'
-            }));
-            setRooms(roomsWithType);
+            setRooms(data);
         } catch (err) {
             alertService.error('Failed to fetch rooms');
             setError(err instanceof Error ? err.message : 'Unknown error');
@@ -75,19 +99,90 @@ export default function Rooms(){
 
     return(
        <>
-            <LocalsTable 
-                tabBody={rooms.map(room => [room._id, 
-                    room.building_name, 
-                    room.type === 'room' ? room.floor_number.toString() : '',
-                    room.type === 'room' ? room.room_number : '',
-                ])}
-                tabHead={['ID', 'Building', 'Floor Number', 'Room Number']} 
-                tabTitle='Rooms' 
-                buttonText='room' 
-                setCreationModal={() => setModalState({ RoomData: null, mode: 'create', open: true })}
-                setEditModal={(room: LocalEntity) => handleEdit(room)}
-                entityType='room'
-            />
+            <div className="mt-2 mb-2 flex justify-start">
+                <button onClick={() => {}}
+                    className="px-4 py-2 bg-[#FFA400] hover:bg-[#e69500] text-white font-medium rounded-md capitalize cursor-pointer">
+                    + Add New Room
+                </button>
+            </div>
+            <div className="bg-white rounded-lg shadow-sm border border-[#EAF6FF] overflow-x-auto w-full">
+                <table className="min-w-full border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                    <thead className="bg-[#2A2A72] text-[#EAF6FF] text-sm uppercase">
+                        <tr>
+                        <th className="px-4 py-2 text-left">Room Number</th>
+                        <th className="px-4 py-2 text-left">Department</th>
+                        <th className="px-4 py-2 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {currentRooms.map((building) => (
+                        <React.Fragment key={building.building_name}>
+                            {/* Building row */}
+                            <tr className="bg-[#009FFD]">
+                                <td
+                                    colSpan={3}
+                                    className="px-4 py-2 text-left font-bold text-[#EAF6FF] text-base"
+                                >
+                                    {building.building_name}
+                                </td>
+                            </tr>
+
+                            {/* Floors under this building */}
+                            {building.floors.map((floor) => (
+                            <React.Fragment key={floor.floor_number}>
+                                {/* Floor row */}
+                                <tr className="bg-[#EAF6FF] border-t">
+                                    <td colSpan={3} className="px-6 py-2 text-sm font-semibold text-[#2A2A72]">
+                                        Etage {floor.floor_number}
+                                    </td>
+                                </tr>
+
+                                {/* Rooms under this floor */}
+                                {floor.rooms.map((room) => (
+                                <tr key={room._id} className="border-t hover:bg-gray-50 transition">
+                                    <td className="px-8 py-3 whitespace-nowrap text-sm text-[#232528]">
+                                        {room.room_number}
+                                    </td>
+                                    <td className="px-8 py-3 whitespace-nowrap text-sm text-[#232528]">
+                                    {room.department_id
+                                        ? room.department_id.department_id
+                                        : "N/A"}
+                                    </td>
+                                    <td className="px-8 py-3 whitespace-nowrap text-sm text-[#232528]">
+                                        <div className="flex space-x-3">
+                                            <button onClick={() => {}} className="text-[#FFA400] hover:text-[#e69500] font-medium">
+                                                Edit
+                                            </button>
+                                            <button className="text-red-500 hover:text-red-700 font-medium">
+                                                Delete
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                ))}
+                            </React.Fragment>
+                            ))}
+                        </React.Fragment>
+                        ))}
+                    </tbody>
+                </table>
+
+
+                {/* Pagination controls */}
+                <div className="flex justify-between items-center mt-4">
+                    <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}
+                        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">
+                        Previous
+                    </button>
+                    <p className="text-sm text-gray-600">
+                        Page {currentPage} of {totalPages}
+                    </p>
+                    <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}
+                        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">
+                        Next
+                    </button>
+                </div>
+            </div>
 
             {modalState.open && (
                 <ModalContent onClose={() => setModalState({ ...modalState, RoomData: null, open: false })} refreshBuildings={fetchRooms}

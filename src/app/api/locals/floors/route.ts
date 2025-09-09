@@ -12,12 +12,24 @@ export async function GET(request: Request) {
             floors = await Floor.find({ building_name: buildingName }).lean();
         } else {
             floors = await Floor.aggregate([
+                // First sort by building_name and floor_number
+                {$sort: { building_name: 1, floor_number: 1 }},
+                // Then group by building_name
                 {
                     $group: {
-                    _id: "$building_name",
-                    floors: { $push: "$$ROOT" },
-                    },
+                        _id: "$building_name",
+                        floors: { $push: "$$ROOT" }
+                    }
                 },
+                /*
+                // Optional: rename _id → building_name for cleaner output
+                {
+                    $project: {
+                        building_name: "$_id",
+                        floors: 1,
+                        _id: 0
+                    }
+                }*/
             ]);
         }
         return NextResponse.json(floors);

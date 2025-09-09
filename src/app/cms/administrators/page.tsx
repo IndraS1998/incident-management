@@ -101,6 +101,11 @@ export default function AdministratorsManagement(){
         <>
             <div className="min-h-screen bg-[#EAF6FF]">
                 <Navbar/>
+                {loading && (
+                    <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-lg">
+                        <div className="animate-spin rounded-full h-10 w-10 border-4 border-solid border-t-[#2A2A72] border-r-[#2A2A72] border-b-transparent border-l-transparent"></div>
+                    </div>
+                )}
                 <main className="container mx-auto p-4">
                     <h1 className="text-2xl font-bold text-[#232528] mb-6">Administrator Management</h1>
                     <form onSubmit={handleSubmit(async formData =>{

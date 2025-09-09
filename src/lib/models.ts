@@ -65,7 +65,7 @@ interface IFloor extends Document {
   building_name: string;
 }
 
-interface IRoom extends Document {
+export interface IRoom extends Document {
   room_number: string;
   floor_number: number;
   building_name: string;

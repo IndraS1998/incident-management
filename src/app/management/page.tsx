@@ -1,7 +1,7 @@
 'use client';
 import { useState,useEffect } from 'react';
 import Navbar from '@/components/navbar';
-import Footer from '../../../components/footer/footerComponent';
+import Footer from "@/components/footerComponent";
 import { fetchData } from '@/lib/functions';
 import { timeSince } from '@/lib/functions';
 import { alertService } from '@/lib/alert.service';
@@ -316,9 +316,9 @@ export default function IncidentManagement() {
           </div>
 
           {/* Aside Table */}
-          <div className="flex gap-6 h-full">
+          <div className="flex flex-col md:flex-row gap-6 h-full">
             {/* Recent Incidents Panel (Left) */}
-            <div className="flex-1 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer">
+            <div className="w-full md:flex-1 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer">
               <div className="p-5 border-b border-gray-100 bg-[#EAF6FF]">
                 <div className="flex justify-between items-center">
                   <h2 className="text-lg font-semibold text-gray-900">Recent Incidents</h2>
@@ -381,7 +381,7 @@ export default function IncidentManagement() {
             </div>
 
             {/* Incidents Table (Right) - Keeping your existing table styling */}
-            <div className="flex-3 bg-white rounded-lg shadow overflow-hidden border border-[#EAF6FF]">
+            <div className="w-full md:flex-[2] bg-white rounded-lg shadow overflow-hidden border border-[#EAF6FF]">
               <div className="bg-white rounded-lg shadow-sm border border-[#EAF6FF] overflow-hidden">
                 <div className="bg-[#2A2A72] bg-opacity-50 px-6 py-3 border-b border-[#EAF6FF]">
                     <h2 className="text-lg font-semibold text-[#EAF6FF]">
@@ -685,6 +685,6 @@ export default function IncidentManagement() {
           )}
         </main>
       </div>
-    <Footer />
-  </>
+      <Footer />
+    </>
 )};

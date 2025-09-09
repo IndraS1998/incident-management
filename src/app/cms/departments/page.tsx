@@ -7,6 +7,7 @@ import {useForm,Controller} from 'react-hook-form';
 import Select from "react-select";
 import { Button } from '@/components/button';
 import { Building2, Phone, DoorClosed, Users } from "lucide-react";
+import React from 'react';
 
 interface Department {
   _id: string;
@@ -401,7 +402,7 @@ export default function DepartmentTable() {
                             </thead>
                             <tbody>
                             {departments.map((dept) => (
-                                <>
+                                <React.Fragment key={dept._id}>
                                     {/* Main Row */}
                                     <tr 
                                         key={dept._id} 
@@ -460,7 +461,7 @@ export default function DepartmentTable() {
                                         </td>
                                     </tr>
                                     )}
-                                </>
+                                </ React.Fragment>
                             ))}
                             </tbody>
                         </table>
