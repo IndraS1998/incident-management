@@ -6,6 +6,7 @@ import { fetchData } from '@/lib/functions';
 import { timeSince } from '@/lib/functions';
 import { alertService } from '@/lib/alert.service';
 import { useForm } from "react-hook-form";
+import { IncidentInfo,getAISuggestion,AISuggestion } from '@/lib/ai.service';
 
 enum IncidentType {
   SOFTWARE = 'software',
@@ -13,12 +14,6 @@ enum IncidentType {
   NETWORK = 'network',
   SECURITY = 'security',
   OTHER = 'other'
-}
-
-enum ResolutionStrategyType {
-  WORKAROUND = 'workaround',
-  LONG_TERM_SOLUTION = 'long_term_solution',
-  TEMPORARY_FIX = 'temporary_fix',
 }
 
 enum IncidentSeverity{
@@ -100,6 +95,7 @@ export default function IncidentManagement() {
   const { register, handleSubmit, watch, reset, setValue , formState: { errors, isValid }} = useForm<IncidentUpdateFormProps>();
   const status = watch("status");
   const [aiSuggested,setAiSuggested] = useState<boolean>(false);
+  const [aiSuggestionLoading,setAiSuggestionLoading] = useState<boolean>(false);
 
   const [filters, setFilters] = useState({
     status: '',
@@ -564,7 +560,10 @@ export default function IncidentManagement() {
                       {editingIncident.description}
                     </p>
                   </div>
-                  <button onClick={() => setEditingIncident(null)} className="text-[#232528] hover:text-[#FFA400] cursor-pointer">
+                  <button onClick={() => {
+                      reset()
+                      setEditingIncident(null)
+                    }} className="text-[#232528] hover:text-[#FFA400] cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -589,17 +588,44 @@ export default function IncidentManagement() {
                   <>
                     {/* AI Suggest Button */}
                     <div className="flex justify-start mb-2">
-                      <button onClick={()=>{
-                          setValue("incident_type", IncidentType.OTHER,{ shouldValidate: true, shouldDirty: true });
-                          setValue("resolution_strategy_type", ResolutionStrategyType.LONG_TERM_SOLUTION,{ shouldValidate: true, shouldDirty: true });
-                          setValue("diagnosis", 'Tentative test diagnosis',{ shouldValidate: true, shouldDirty: true });
-                          setValue("measure", 'Tentative measure',{ shouldValidate: true, shouldDirty: true });
-                          setValue("recommendation", 'Tentative recommendation',{ shouldValidate: true, shouldDirty: true });
-                          setAiSuggested(true);
+                      <button onClick={async ()=>{
+                          const incidentInfo : IncidentInfo = {
+                            description: editingIncident.description,
+                            severity: editingIncident.severity,
+                            department: editingIncident.department.name,
+                          }
+                          setAiSuggestionLoading(true);
+                          try{
+                            const suggestion : AISuggestion = await getAISuggestion(incidentInfo);
+                            if(suggestion.incident_type.includes('|')){
+                              const incident_types = suggestion.incident_type.split('|').map(t => t.trim().toLowerCase());
+                              setValue("incident_type", incident_types[0],{ shouldValidate: true, shouldDirty: true });
+                            }else{
+                              setValue("incident_type", suggestion.incident_type.toLowerCase(),{ shouldValidate: true, shouldDirty: true });
+                            }
+                            
+                            if(suggestion.resolution_strategy_type.includes('|')){
+                              const resolution_types = suggestion.resolution_strategy_type.split('|').map(t => t.trim().toLowerCase());
+                              setValue("resolution_strategy_type", resolution_types[0],{ shouldValidate: true, shouldDirty: true });
+                            }else{
+                              console.log(suggestion.resolution_strategy_type)
+                              setValue("resolution_strategy_type", suggestion.resolution_strategy_type.toLowerCase(),{ shouldValidate: true, shouldDirty: true });
+                            }
+                            setValue("diagnosis", suggestion.diagnosis,{ shouldValidate: true, shouldDirty: true });
+                            setValue("recommendation", suggestion.recommendation,{ shouldValidate: true, shouldDirty: true });
+                            setValue("measure", suggestion.measure.join('\n'),{ shouldValidate: true, shouldDirty: true });
+                          }catch(error){
+                            console.log(error)
+                            alertService.error('Failed to get AI suggestion. Please try again later')
+                          }finally{
+                            setAiSuggestionLoading(false);
+                          }
+                          /*
+                          setAiSuggested(true);*/
                         }} type="button"
                         className="px-3 py-1.5 cursor-pointer text-sm font-medium rounded-md bg-[#FFA400] text-white hover:bg-[#e69500] transition"
                       >
-                        ✨ {aiSuggested ? "Suggest another solution" : "Let AI Suggest"}
+                        {aiSuggestionLoading ? "Loading..." : "✨ " + (aiSuggested ? "Suggest another solution" : "Let AI Suggest")}
                       </button>
                     </div>
 
@@ -634,7 +660,7 @@ export default function IncidentManagement() {
                       <textarea
                         {...register("diagnosis")}
                         className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
-                        rows={3}
+                        rows={2}
                       />
                       {errors.diagnosis && <p className='text-red-500 text-xs mt-1'>{errors.diagnosis.message}</p>}
                     </div>
@@ -644,7 +670,7 @@ export default function IncidentManagement() {
                       <textarea
                         {...register("measure",{required : true})}
                         className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
-                        rows={2}
+                        rows={4}
                       />
                       {errors.measure && <p className='text-red-500 text-xs mt-1'>{errors.measure.message}</p>}
                     </div>

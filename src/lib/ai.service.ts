@@ -7,21 +7,18 @@ interface GroqResponse {
     }>;
 }
 
-interface AISuggestion {
-    diagnostic: string;
-    etapes_resolution: string[];
-    classification: string;
-    priorite: string;
-    service_impacte: string;
-    temps_resolution_estime: string;
-    prevention: string;
+export interface AISuggestion {
+    diagnosis: string;
+    measure: string[];
+    incident_type: string;
+    resolution_strategy_type: string;
+    recommendation: string;
 }
 
-interface IncidentInfo {
+export interface IncidentInfo {
     description: string;
-    service: string;
-    type_incident: string;
-    niveau_urgence: string;
+    department: string;
+    severity: string;
 }
 
 class GroqClient {
@@ -56,33 +53,29 @@ class GroqClient {
 }
 
 function createFallbackSuggestion(
-    description: string, 
-    service: string, 
-    type_incident: string, 
-    niveau_urgence: string, 
+    incidentDetails: IncidentInfo
 ): AISuggestion {
+    const { description } = incidentDetails;
     return {
-        "diagnostic": description.length > 100 
-            ? `Analyse automatique indisponible. Incident: ${description.substring(0, 100)}...` 
+        "diagnosis": description.length > 100 
+            ? `AI analysis is not possible in the meantime. Incident: ${description.substring(0, 100)}...` 
             : description,
-        "etapes_resolution": [
-            "1. Identifier les composants impliqués dans l'incident",
-            "2. Vérifier les connexions réseau et alimentation", 
-            "3. Redémarrer les services/équipements concernés",
-            "4. Tester la fonctionnalité après intervention",
-            "5. Documenter la solution et escalader si nécessaire"
+        "measure": [
+            "1. Identify the components involved in the incident",
+            "2. Check network connections and power supply",
+            "3. Restart the relevant services/equipment",
+            "4. Test the functionality after intervention",
+            "5. Document the solution and escalate if necessary"
         ],
-        "classification": type_incident || "Analyse manuelle requise",
-        "priorite": niveau_urgence || "Modérée", 
-        "service_impacte": service || "Non identifié",
-        "temps_resolution_estime": "2h",
-        "prevention": "Effectuer maintenance préventive et surveillance proactive"
+        "resolution_strategy_type":  "immediate_fix",
+        "incident_type":  "other", 
+        "recommendation": "Perform regular maintenance and updates to prevent similar incidents in the future."
     };
 }
 
 export async function getAISuggestion(incidentInfo : IncidentInfo): Promise<AISuggestion> {
-    const { description, service, type_incident, niveau_urgence } = incidentInfo;
-    const GROQ_API_KEY = process.env.GROQ_API_KEY;
+    const { description, department, severity } = incidentInfo;
+    const GROQ_API_KEY = process.env.NEXT_PUBLIC_GROQ_API_KEY;
     
     if (!GROQ_API_KEY) {
         throw new Error("GROQ_API_KEY environment variable is required");
@@ -90,64 +83,74 @@ export async function getAISuggestion(incidentInfo : IncidentInfo): Promise<AISu
     
     const client = new GroqClient(GROQ_API_KEY);
     
-    const systemPrompt = `Tu es un expert IT du Ministère des Finances (MINFI) du Cameroun. Ton rôle est de fournir des diagnostics précis et des étapes de résolution claires et pratiques pour aider les gestionnaires d'incidents informatiques à résoudre efficacement les problèmes signalés, en s'appuyant sur le contexte spécifique du MINFI.
-Analyse l'incident suivant et fournis une réponse structurée au format JSON strict.
+    const systemPrompt = `You are an IT expert at the Ministry of Finance (MINFI) of Cameroon.
+        Your role is to provide precise diagnostics and clear, practical resolution steps to help IT incident managers
+        effectively resolve reported problems, drawing on the specific context of MINFI.
+        Analyze the following incident and provide a structured response in a strict JSON format
 
-## Contexte disponible Applications connues (avec dépendances) :
+## Available Context: Known Applications (with dependencies) :
 
 📌 **Direction du Budget (DGB)**
-- Living.dgb.cm : décisions de déblocage (LAN, PROBMIS)
-- PGI : comptabilité & exécution des dépenses (Internet, LAN, ANTILOPE, PROBMIS)
-- PROBMIS : suivi des engagements budgétaires (LAN, WAN)
-- ANTILOPE : gestion personnel & solde (LAN, WAN)
-- AVI : attestation de virement irrévocable (LAN)
-- DECOSYS : suivi dette flottante (LAN)
-- GovRH : suivi personnel DGB (LAN)
-- ArchiDccs : archivage documents (LAN)
+    Living.dgb.cm: Deblocking decisions (LAN, PROBMIS)
+    PGI (Integrated Management Software): Accounting & expenditure execution (Internet, LAN, ANTILOPE, PROBMIS)
+    PROBMIS (Budget Commitment Monitoring System): Budget commitment monitoring (LAN, WAN)
+    ANTILOPE (Human Resources and Payroll System): Staff & payroll management (LAN, WAN)
+    AVI (Irrevocable Transfer Voucher): Irrevocable transfer attestation (LAN)
+    DECOSYS (Floating Debt Monitoring System): Floating debt monitoring (LAN)
+    GovRH (Government Human Resources): DGB staff monitoring (LAN)
+    ArchiDccs (Document Archiving System): Document archiving (LAN)
 
 📌 **CAB-IG-SG**
-- E-bulletin : bulletins de solde en ligne (Internet, Interco, ANTILOPE)
-- mail.minfi.cm : messagerie professionnelle (Internet, LAN, PROBMIS)
-- E-bon : suivi des bons d’engagements (Internet, LAN, PROBMIS, CADRE, SYSTAC)
-- SYGESCA : gestion courrier administratif (LAN)
-- FDX : échanges de données financières inter-administrations (Internet, LAN, PROBMIS, CAMCIS, HARMONY…)
+    E-bulletin: Online pay slips (Internet, Interco, ANTILOPE)
+    mail.minfi.cm: Professional email (Internet, LAN, PROBMIS)
+    E-bon: Commitment order monitoring (Internet, LAN, PROBMIS, CADRE, SYSTAC)
+    SYGESCA: Administrative mail management (LAN)
+    FDX: Inter-agency financial data exchange (Internet, LAN, PROBMIS, CAMCIS, HARMONY…)
 
 📌 **DNCM / DP / DRH / DRFI**
-- SIGIPES : gestion personnels & solde (LAN, Interconnexion)
-- SIPAE : projections macroéconomiques (LAN, Interconnexion)
-- TABORD soft : tableau de bord finances de l’État (LAN, Interconnexion)
-- BDP6+ : balance des paiements FMI (LAN, Interconnexion)
-- SRH : gestion RH (LAN, ANTILOPE)
-- RMS : record management (LAN)
-- COLEPS : e-procurement (LAN, Internet)
-- BSP Soft : borne de solde provisoire (LAN)
-- DP Manager : gestion fiches (LAN)
-- GEPSOFT : comptabilité matière (LAN)
+    SIGIPES: Personnel & payroll management (LAN, Interconnection)
+    SIPAE: Macroeconomic projections (LAN, Interconnection)
+    TABORD soft: State finance dashboard (LAN, Interconnection)
+    BDP6+: IMF balance of payments (LAN, Interconnection)
+    SRH: Human Resources management (LAN, ANTILOPE)
+    RMS: Record management (LAN)
+    COLEPS: E-procurement (LAN, Internet)
+    BSP Soft: Provisional payroll terminal (LAN)
+    DP Manager: Form management (LAN)
+    GEPSOFT: Material accounting (LAN)
 
-INFORMATIONS DE L'INCIDENT:
+📌 **Acronyms Explained**
+    LAN: Local Area Network
+    WAN: Wide Area Network
+    Interco: Ministerial WAN of the Ministry of Finance.
+    CADRE: Specific internal application for commitment frameworks
+    SYSTAC: Specific internal application or system.
+    CAMCIS: MIS for customs and transit.
+    HARMONY: Likely another external or partner financial management system.
+    IMF: International Monetary Fund
+
+INCIDENT RELEVANT DETAILS:
 - Description: ${description}
-- Service: ${service}  
-- Type: ${type_incident}
-- Urgence: ${niveau_urgence}
+- Department affected or where declared: ${department}  
+- Severity: ${severity}
 
-FORMAT DE RÉPONSE OBLIGATOIRE (JSON uniquement):
+OBLIGATORY RESPONSE FORMAT (JSON only):
 {
-  "diagnostic": "Diagnostic précis de la cause probable",
-  "etapes_resolution": [
-    "1. Action spécifique à effectuer",
-    "2. Vérification ou test à faire",
-    "3. Configuration à modifier",
-    "4. Escalade si nécessaire",
-    "5. Validation finale"
+  "diagnosis": "Most likely cause of the incident",
+  "measure": [
+    "1. Specific action to take",
+    "2. Verification or test to perform",
+    "3. Configuration to modify",
+    "4. Escalation if necessary",
+    "5. Final validation"
   ],
-  "classification": "Matériel|Logiciel bureautique|Logiciel métier|Infrastructure Réseau|Sécurité|Autres",
-  "priorite": "Critique|Élevée|Modérée|Faible",
-  "service_impacte": "${service}",
+  "incident_type": "software|hardware|network|security|other",
+  "resolution_strategy_type": "immediate_fix|workaround|long_term_solution",
   "temps_resolution_estime": "30min|2h|1j|3j|1sem",
-  "prevention": "Mesure préventive recommandée"
+  "recommendation": "preventive measures to addopt in order to avoid recurrence of the incident"
 }
 
-Analyse maintenant l'incident fourni et retourne UNIQUEMENT le JSON de réponse.`;
+Now analyse the submittted incident and return a Json Response.`;
 
     try {
         const response = await client.chatCompletionsCreate({
@@ -178,26 +181,24 @@ Analyse maintenant l'incident fourni et retourne UNIQUEMENT le JSON de réponse.
             
             // Create a validated suggestion with default values for missing fields
             const validatedSuggestion: AISuggestion = {
-                diagnostic: suggestion.diagnostic || "Non spécifié",
-                etapes_resolution: Array.isArray(suggestion.etapes_resolution) 
-                    ? suggestion.etapes_resolution 
-                    : ["Analyser l'incident manuellement"],
-                classification: suggestion.classification || "Non spécifié",
-                priorite: suggestion.priorite || "Modérée",
-                service_impacte: suggestion.service_impacte || service || "Non identifié",
-                prevention: suggestion.prevention || "Non spécifié",
-                temps_resolution_estime: suggestion.temps_resolution_estime || "2h"
+                diagnosis: suggestion.diagnosis || "Non spécifié",
+                measure: Array.isArray(suggestion.measure) 
+                    ? suggestion.measure 
+                    : ["Manually analyse the Incident"],
+                incident_type: suggestion.incident_type || "Not specified",
+                resolution_strategy_type: suggestion.resolution_strategy_type || "Not specified",
+                recommendation: suggestion.recommendation || "Not specified",
             };
             
             return validatedSuggestion;
             
         } catch (parseError) {
             console.error("JSON parsing error:", parseError);
-            return createFallbackSuggestion(description, service, type_incident, niveau_urgence);
+            return createFallbackSuggestion(incidentInfo);
         }
             
     } catch (error) {
         console.error("API error:", error);
-        return createFallbackSuggestion(description, service, type_incident, niveau_urgence);
+        return createFallbackSuggestion(incidentInfo);
     }
 }
