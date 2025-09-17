@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { connectDatabase } from '@/lib/connect';
-import { Incident,Room,AdminDepartment,IncidentResolution } from '@/lib/models';
-import {Types} from 'mongoose'
+import { Incident,Room,AdminDepartment,IncidentResolution,AIResolutionProposal } from '@/lib/models';
+import {Types,startSession} from 'mongoose'
 
 export async function GET(req:Request){
     const {searchParams}= new URL(req.url);
@@ -118,6 +118,90 @@ export async function PATCH(req: Request) {
             message: 'Failed to update incident status' 
         }, { status: 500 });
     }
+}
+
+export async function PUT(req: Request) {
+  const session = await startSession();
+  session.startTransaction();
+
+  try {
+    const body = await req.json();
+    const { _id, proposal } = body;
+
+    if (!_id || !proposal) {
+      return NextResponse.json(
+        { error: "Incident _id and proposal data are required" },
+        { status: 400 }
+      );
+    }
+
+    await connectDatabase();
+
+    if (!Types.ObjectId.isValid(_id)) {
+      return NextResponse.json(
+        { error: "Invalid incident ID format" },
+        { status: 400 }
+      );
+    }
+
+    // 1. Save AIResolutionProposal
+    const newProposal = await AIResolutionProposal.create(
+      [
+        {
+          proposal_id: `PROP-${Date.now()}`,
+          incident_id: _id,
+          admin_id: proposal.admin_id,
+          incident_type: proposal.incident_type,
+          diagnosis: proposal.diagnosis,
+          resolution_strategy_type: proposal.resolution_strategy_type,
+          measure: proposal.measure,
+          recommendation: proposal.recommendation,
+        },
+      ],
+      { session }
+    );
+
+    // 2. Update Incident state
+    const updatedIncident = await Incident.findByIdAndUpdate(
+      _id,
+      {
+        status: "in_progress",
+        updated_at: new Date(),
+      },
+      { new: true, runValidators: true, session }
+    );
+
+    if (!updatedIncident) {
+      await session.abortTransaction();
+      return NextResponse.json(
+        { error: "Incident not found" },
+        { status: 404 }
+      );
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return NextResponse.json({
+      success: true,
+      message: "Incident updated to in progress with AI proposal",
+      data: {
+        incident_id: updatedIncident.incident_id,
+        status: updatedIncident.status,
+        updated_at: updatedIncident.updated_at,
+        proposal_id: newProposal[0].proposal_id,
+      },
+    });
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+
+    console.error("Error processing AI proposal:", error);
+    return NextResponse.json(
+      { success: false, message: "Failed to apply AI proposal" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(req: Request) {

@@ -85,6 +85,17 @@ export interface IIncident extends Document {
   updated_at?: Date;
 }
 
+interface IAIResolutionProposal extends Document{
+  proposal_id: string;
+  incident_id: Types.ObjectId | IIncident;
+  admin_id: Types.ObjectId | IAdmin;
+  incident_type?: IncidentType;
+  diagnosis: string;
+  resolution_strategy_type: ResolutionStrategyType;
+  measure: string;
+  recommendation?: string;
+}
+
 interface IIncidentResolution extends Document {
   resolution_id: string;
   incident_id: Types.ObjectId | IIncident;
@@ -164,6 +175,17 @@ const IncidentResolutionSchema = new Schema<IIncidentResolution>({
   recommendation: { type: String }
 });
 
+const AIResolutionProposalSchema = new Schema<IAIResolutionProposal>({
+  proposal_id: { type: String, required: true, unique: true },
+  incident_id: { type: Schema.Types.ObjectId, ref: 'Incident', required: true },
+  admin_id: { type: Schema.Types.ObjectId, ref: 'Admin', required: true },
+  incident_type: { type: String, enum: Object.values(IncidentType) },
+  diagnosis: { type: String },
+  resolution_strategy_type: { type: String, enum: Object.values(ResolutionStrategyType) },
+  measure: { type: String },
+  recommendation: { type: String }
+})
+
 const AdminDepartmentSchema = new Schema<IAdminDepartment>({
   admin_id: { type: Schema.Types.ObjectId, ref: 'Admin', required: true },
   department_id: { type: Schema.Types.ObjectId, ref: 'Department', required: true }
@@ -180,3 +202,4 @@ export const Room = models.Room || model<IRoom>('Room', RoomSchema);
 export const Incident = models.Incident || model<IIncident>('Incident', IncidentSchema);
 export const IncidentResolution = models.IncidentResolution || model<IIncidentResolution>('IncidentResolution', IncidentResolutionSchema);
 export const AdminDepartment = models.AdminDepartment || model<IAdminDepartment>('AdminDepartment', AdminDepartmentSchema);
+export const AIResolutionProposal = models.AIResolutionProposal || model<IAIResolutionProposal>('AIResolutionProposal',AIResolutionProposalSchema)

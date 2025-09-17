@@ -4,87 +4,10 @@ import Navbar from '@/components/navbar';
 import Footer from "@/components/footerComponent";
 import { fetchData } from '@/lib/functions';
 import { timeSince } from '@/lib/functions';
-import { alertService } from '@/lib/alert.service';
-import { useForm } from "react-hook-form";
-import { IncidentInfo,getAISuggestion,AISuggestion } from '@/lib/ai.service';
-import { set } from 'mongoose';
-
-enum IncidentType {
-  SOFTWARE = 'software',
-  HARDWARE = 'hardware',
-  NETWORK = 'network',
-  SECURITY = 'security',
-  OTHER = 'other'
-}
-
-enum IncidentSeverity{
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  CRITICAL = 'critical'
-}
-
-enum IncidentResolutionStatus {
-  PENDING = 'pending',
-  IN_PROGRESS = 'in_progress',
-  RESOLVED = 'resolved',
-  CLOSED = 'closed'
-}
-
-// Enums
-enum AdminStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-}
-
-enum AdminRole {
-  SUPERADMIN = 'superadmin',
-  DEPARTMENT_ADMIN = 'incident_manager',
-}
-
-interface IDepartment{
-  department_id: string;
-  name: string;
-  contact: string;
-}
-
-interface Incident{
-  _id:string;
-  incident_id: string;
-  description: string;
-  severity: IncidentSeverity;
-  status: IncidentResolutionStatus;
-  reporter_full_name: string;
-  reporter_email: string;
-  reporter_contact?: string;
-  room_id: string;
-  room_number:string;
-  floor_number:number;
-  building_name:string;
-  department: IDepartment;
-  created_at: Date;
-  updated_at: Date;
-}
-
-interface IAdmin {
-  _id:string;
-  admin_id: string; // Unique identifier for the admin composed of first letter of first name and lastname
-  name: string;
-  email: string;
-  phone: string;
-  password_hash: string;
-  status: AdminStatus;
-  role: AdminRole;
-}
-
-interface IncidentUpdateFormProps {
-  status:string;
-  incident_type:string;
-  resolution_strategy_type:string;
-  diagnosis:string;
-  measure:string;
-  recommendation:string;
-}
+import { Incident,IAdmin } from '@/types/management/form';
+import { IncidentResolutionStatus,IncidentSeverity,IncidentType } from '@/types/management/enums';
+import Acknowledgement from '@/components/management/acknowlegement';
+import Closure from '@/components/management/closure';
 
 export default function IncidentManagement() {
     
@@ -93,10 +16,6 @@ export default function IncidentManagement() {
   const [pendingIncidents,setPendingIncidents] = useState<Incident[]>([]);
   const [isLoading,setIsLoading] = useState<boolean>(false);
   const [refreshCount,setRefreshCount] = useState<number>(0);
-  const { register, handleSubmit, watch, reset, setValue , formState: { errors, isValid }} = useForm<IncidentUpdateFormProps>();
-  const status = watch("status");
-  const [aiSuggested,setAiSuggested] = useState<boolean>(false);
-  const [aiSuggestionLoading,setAiSuggestionLoading] = useState<boolean>(false);
 
   const [filters, setFilters] = useState({
     status: '',
@@ -109,31 +28,6 @@ export default function IncidentManagement() {
 
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [incidentDetail,setIncidentDetail] = useState<Incident | null>(null);
-
-  async function updateIncident(){
-    setIsLoading(true)
-    setIncidentDetail(null)
-    try{
-      const response = await fetch('/api/incidents', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({_id:incidentDetail?._id}),
-      })
-      if (!response.ok) {
-        alertService.error("Failed to update administrator");
-        return;
-      }
-      alertService.success('Successfully edited')
-      setRefreshCount(()=>(refreshCount + 1))
-    }catch(error){
-      console.log(error)
-      alertService.error('failed to update incident! Please try again later')
-    }finally{
-      setIsLoading(false)
-    }
-  }
 
   async function fetchIncidents(role:string,admin_id: string|null){
     let data
@@ -148,9 +42,9 @@ export default function IncidentManagement() {
   async function fetchPendingIncidents(role:string,admin_id: string|null){
     let data
     if(role === 'superadmin'){
-        data = await fetchData(`/api/incidents/admin/pending?count=false`,setIsLoading);
+      data = await fetchData(`/api/incidents/admin/pending?count=false`,setIsLoading);
     }else{
-        data = await fetchData(`/api/incidents/pending?adminId=${admin_id}&count=false`,setIsLoading);
+      data = await fetchData(`/api/incidents/pending?adminId=${admin_id}&count=false`,setIsLoading);
     }
     setPendingIncidents(data)
   }
@@ -162,30 +56,7 @@ export default function IncidentManagement() {
       fetchPendingIncidents(connectedAdmin.role,connectedAdmin._id)
   },[refreshCount])
 
-  const onSubmit = async (data : IncidentUpdateFormProps) => {
-    const adminData = localStorage.getItem('admin_user');
-    const connectedAdmin : IAdmin = adminData ? JSON.parse(adminData) : null;
-    setIsLoading(true);
-    setEditingIncident(null);
-    try {
-      const res = await fetch(`/api/incidents`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data,incident_id:editingIncident?._id,admin_id:connectedAdmin._id}),
-      });
-
-      if (!res.ok) throw new Error("Failed to update incident");
-      alertService.success('Successfully Updated Incident');
-      setRefreshCount(()=>(refreshCount + 1))
-      reset();
-      setAiSuggested(false);
-    } catch (err) {
-      console.error(err);
-      alertService.error('Failed to update Incident')
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  
 
   return (
     <>
@@ -445,272 +316,12 @@ export default function IncidentManagement() {
 
           {/* viewing recent incident detail */}
           {incidentDetail && (
-          <div className="fixed inset-0 backdrop-blur-lg flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-2xl border border-[#EAF6FF]">
-              {/* Header */}
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-[#232528]">Incident Details</h2>
-                  <div className="flex items-center mt-1 space-x-2">
-                    <span className="text-xs text-gray-500">
-                      #{incidentDetail.incident_id}
-                    </span>
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      incidentDetail.status === 'pending' ? 'bg-blue-100 text-blue-800' :
-                      incidentDetail.status === 'in_progress' ? 'bg-yellow-100 text-yellow-800' :
-                      incidentDetail.status === 'resolved' ? 'bg-green-100 text-green-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {incidentDetail.status.replace('_', ' ')}
-                    </span>
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      incidentDetail.severity === 'critical' ? 'bg-red-100 text-red-800' :
-                      incidentDetail.severity === 'high' ? 'bg-orange-100 text-orange-800' :
-                      incidentDetail.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-blue-100 text-blue-800'
-                    }`}>
-                      {incidentDetail.severity}
-                    </span>
-                  </div>
-                </div>
-                <button onClick={() => setIncidentDetail(null)} className="text-gray-400 hover:text-[#FFA400] transition-colors cursor-pointer">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Main Content */}
-              <div className="space-y-6">
-                {/* Incident Overview */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Description</h3>
-                      <p className="mt-1 text-[#232528]">{incidentDetail.description}</p>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Location</h3>
-                      <p className="mt-1 text-[#232528]">
-                        {incidentDetail.building_name}, Floor {incidentDetail.floor_number}, Room {incidentDetail.room_number}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Reporter</h3>
-                      <p className="mt-1 text-[#232528]">
-                        {incidentDetail.reporter_full_name}
-                        {incidentDetail.reporter_contact && (
-                          <span className="block text-sm text-gray-500 mt-1">
-                            {incidentDetail.reporter_contact}
-                          </span>
-                        )}
-                        <span className="block text-sm text-gray-500">
-                          {incidentDetail.reporter_email}
-                        </span>
-                      </p>
-                    </div>
-
-                    <div>
-                      <h3 className="text-sm font-medium text-gray-500">Timeline</h3>
-                      <div className="mt-1 space-y-1">
-                        <p className="text-sm text-[#232528]">
-                          Reported: {new Date(incidentDetail.created_at).toLocaleString()}
-                        </p>
-                        <p className="text-sm text-[#232528]">
-                          Last Updated: {new Date(incidentDetail.updated_at).toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Status Update Section */}
-                <div className="pt-4 border-t border-gray-200">
-                  <h3 className="text-lg font-medium text-[#232528] mb-4">Incident Management</h3>
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-[#EAF6FF] p-4 rounded-lg">
-                    <div className="flex-1">
-                      <p className="text-sm text-[#232528]">
-                        Click button to take responsibility for resolving this incident
-                      </p>
-                    </div>
-                    <button className="px-4 py-2 border border-gray-300 text-[#232528] cursor-pointer rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap"
-                    onClick={updateIncident}
-                    >
-                      Here
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+            <Acknowledgement incident={incidentDetail} setIncident={setIncidentDetail} isLoading={isLoading} setIsLoading={setIsLoading} setRefreshCount={setRefreshCount} refreshCount={refreshCount} />
           )}
 
           {/* Edit Incident Modal */}
           {editingIncident && (
-          <div className="fixed inset-0 backdrop-blur-lg flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl border border-[#EAF6FF]">
-              <div className="flex justify-between items-start mb-1">
-                  <div className="mb-4">
-                    <h2 className="text-2xl font-bold text-gray-900">
-                      Resolve Incident
-                    </h2>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {editingIncident.description}
-                    </p>
-                  </div>
-                  <button onClick={() => {
-                      reset()
-                      setAiSuggested(false)
-                      setEditingIncident(null)
-                    }} className="text-[#232528] hover:text-[#FFA400] cursor-pointer">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-              </div>
-              <form onSubmit={handleSubmit(async FD => onSubmit(FD))} className="space-y-4 p-4">
-                {/* Status Selection */}
-                <div>
-                  <label className="block text-sm font-medium mb-1">Incident Status</label>
-                  <select
-                    {...register("status", { required: true })}
-                    className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
-                  >
-                    <option value="">Select</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                  </select>
-                </div>
-
-                {/* Resolution Fields (only if Resolved) */}
-                {status === "resolved" && (
-                  <>
-                    {/* AI Suggest Button */}
-                    {!aiSuggested && (
-                    <div className="flex justify-start mb-2">
-                      <button onClick={async ()=>{
-                          const incidentInfo : IncidentInfo = {
-                            description: editingIncident.description,
-                            severity: editingIncident.severity,
-                            department: editingIncident.department.name,
-                          }
-                          setAiSuggestionLoading(true);
-                          try{
-                            const suggestion : AISuggestion = await getAISuggestion(incidentInfo);
-                            if(suggestion.incident_type.includes('|')){
-                              const incident_types = suggestion.incident_type.split('|').map(t => t.trim().toLowerCase());
-                              setValue("incident_type", incident_types[0],{ shouldValidate: true, shouldDirty: true });
-                            }else{
-                              setValue("incident_type", suggestion.incident_type.toLowerCase(),{ shouldValidate: true, shouldDirty: true });
-                            }
-                            
-                            if(suggestion.resolution_strategy_type.includes('|')){
-                              const resolution_types = suggestion.resolution_strategy_type.split('|').map(t => t.trim().toLowerCase());
-                              setValue("resolution_strategy_type", resolution_types[0],{ shouldValidate: true, shouldDirty: true });
-                            }else{
-                              console.log(suggestion.resolution_strategy_type)
-                              setValue("resolution_strategy_type", suggestion.resolution_strategy_type.toLowerCase(),{ shouldValidate: true, shouldDirty: true });
-                            }
-                            setValue("diagnosis", suggestion.diagnosis,{ shouldValidate: true, shouldDirty: true });
-                            setValue("recommendation", suggestion.recommendation,{ shouldValidate: true, shouldDirty: true });
-                            setValue("measure", suggestion.measure.join('\n'),{ shouldValidate: true, shouldDirty: true });
-                            setAiSuggested(true)
-                          }catch(error){
-                            console.log(error)
-                            alertService.error('Failed to get AI suggestion. Please try again later')
-                          }finally{
-                            setAiSuggestionLoading(false);
-                          }
-                        }} type="button"
-                        className="px-3 py-1.5 cursor-pointer text-sm font-medium rounded-md bg-[#FFA400] text-white hover:bg-[#e69500] transition"
-                      >
-                        {aiSuggestionLoading ? "Loading..." : "✨ Let AI Suggest"}
-                      </button>
-                    </div>)}
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Incident Type</label>
-                      <select {...register("incident_type", { required: true })} className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none">
-                        <option value="">Select Incident Type</option>
-                        <option value="software">Software</option>
-                        <option value="hardware">Hardware</option>
-                        <option value="network">Network</option>
-                        <option value="security">Security</option>
-                        <option value="other">Other</option>
-                      </select>
-                      {errors.incident_type && <p className="text-red-500 text-xs mt-1">{errors.incident_type.message}</p>}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Resolution Strategy</label>
-                      <select {...register("resolution_strategy_type",{required: true})}
-                        className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
-                      >
-                        <option value="">Select Resolution Strategy</option>
-                        <option value="immediate_fix">Immediate Fix</option>
-                        <option value="workaround">Workaround</option>
-                        <option value="long_term_solution">Long Term Solution</option>
-                      </select>
-                      {errors.resolution_strategy_type && <p className='text-red-500 text-xs mt-1'>{errors.resolution_strategy_type.message}</p>}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Diagnosis</label>
-                      <textarea
-                        {...register("diagnosis")}
-                        className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
-                        rows={2}
-                      />
-                      {errors.diagnosis && <p className='text-red-500 text-xs mt-1'>{errors.diagnosis.message}</p>}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Measures Taken</label>
-                      <textarea
-                        {...register("measure",{required : true})}
-                        className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
-                        rows={4}
-                      />
-                      {errors.measure && <p className='text-red-500 text-xs mt-1'>{errors.measure.message}</p>}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium mb-1">Recommendation (optional)</label>
-                      <textarea
-                        {...register("recommendation")}
-                        className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
-                        rows={2}
-                      />
-                    </div>
-                  </>
-                )}
-
-                {/* Submit */}
-                {isValid?(
-                  <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full rounded-md bg-[#2A2A72] text-white py-2 hover:bg-[#2A2A72]/90 disabled:opacity-50 cursor-pointer"
-                >
-                  {isLoading ? "Updating..." : "Update Incident"}
-                </button>
-                ):(
-                  <button
-                  type="submit"
-                  disabled={true}
-                  className="w-full rounded-md bg-gray-300 text-gray-500 py-2  cursor-disabled"
-                >
-                  {isLoading ? "Updating..." : "Update Incident"}
-                </button>
-                )}
-                
-              </form>
-            </div>
-          </div>
+            <Closure incident={editingIncident} setIncident={setEditingIncident} isLoading={isLoading} setIsLoading={setIsLoading} setRefreshCount={setRefreshCount} refreshCount={refreshCount} />
           )}
         </main>
       </div>

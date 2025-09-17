@@ -1,0 +1,1 @@
+mmdc -i management-workflow.md -o diagram.png

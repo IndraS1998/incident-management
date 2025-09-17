@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Admin, Department, Building, Floor, Room, Incident, IncidentResolution, AdminDepartment } from './models';
+import { AIResolutionProposal } from './models';
 
 export async function initializeDatabase(): Promise<{ success: boolean; message: string }> {
   const uri = process.env.MONGODB_URI;
@@ -21,13 +21,14 @@ export async function initializeDatabase(): Promise<{ success: boolean; message:
       //Building.init(),
       //Floor.init(),
       //Room.init(),
-      Incident.init(),
+      //Incident.init(),
       //IncidentResolution.init(),
       //AdminDepartment.init()
+      AIResolutionProposal.init()
     ]);
 
     // Create any additional indexes not defined in schemas
-    await createAdditionalIndexes();
+    //await createAdditionalIndexes();
 
     return {
       success: true,
@@ -42,6 +43,7 @@ export async function initializeDatabase(): Promise<{ success: boolean; message:
   }
 }
 
+/*
 async function createAdditionalIndexes(): Promise<void> {
   // Add any compound indexes or additional indexes here
   await Admin.collection.createIndex({ email: 1 }, { unique: true });
@@ -50,4 +52,4 @@ async function createAdditionalIndexes(): Promise<void> {
     { unique: true }
   );
   // Add other indexes as needed...
-}
+}*/

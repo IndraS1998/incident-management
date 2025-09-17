@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function GET() {
   try {
     await initializeDatabase();
-    return NextResponse.json({ success: true, message: "Database initialized" });
+    return NextResponse.json({ success: true, message: "Database successfully updated" });
   } catch (error) {
     console.log(error)
     return NextResponse.json(
