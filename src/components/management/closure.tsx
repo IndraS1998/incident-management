@@ -1,15 +1,29 @@
 import React,{useState} from 'react'
 import { useForm } from "react-hook-form";
 import { IncidentUpdateFormProps,ClosureProps,IAdmin } from '@/types/management/form';
-import { IncidentInfo,getAISuggestion,AISuggestion } from '@/lib/ai.service';
 import { alertService } from '@/lib/alert.service';
+import AISuggestionFeedback from './loadSuggestion';
+import { fetchData } from '@/lib/functions';
 
 
 const Closure : React.FC<ClosureProps> = ({incident, setIncident,isLoading, setIsLoading,setRefreshCount,refreshCount}) =>{
-    const [aiSuggested,setAiSuggested] = useState<boolean>(false);
     const [aiSuggestionLoading,setAiSuggestionLoading] = useState<boolean>(false);
+    //const [aiSuggested,setAiSuggested] = useState<boolean>(false);
     const { register, handleSubmit, watch, reset, setValue , formState: { errors, isValid }} = useForm<IncidentUpdateFormProps>();
     const status = watch("status");
+
+    async function onLoadSuggestion(){
+        const res = await fetchData(`/api/suggestion?_id=${incident._id}&count=false`,setAiSuggestionLoading)
+        if(res.success){
+            console.log(res.data)
+            setValue("incident_type", res.data.incident_type,{ shouldValidate: true, shouldDirty: true });
+            setValue("resolution_strategy_type", res.data.resolution_strategy_type,{ shouldValidate: true, shouldDirty: true });
+            setValue("diagnosis", res.data.diagnosis,{ shouldValidate: true, shouldDirty: true });
+            setValue("recommendation", res.data.recommendation,{ shouldValidate: true, shouldDirty: true });
+            setValue("measure", res.data.measure,{ shouldValidate: true, shouldDirty: true });
+            //setAiSuggested(true)
+        }
+    }
 
     const onSubmit = async (data : IncidentUpdateFormProps) => {
         const adminData = localStorage.getItem('admin_user');
@@ -27,7 +41,6 @@ const Closure : React.FC<ClosureProps> = ({incident, setIncident,isLoading, setI
           alertService.success('Successfully Updated Incident');
           setRefreshCount(()=>(refreshCount + 1))
           reset();
-          setAiSuggested(false);
         } catch (err) {
           console.error(err);
           alertService.error('Failed to update Incident')
@@ -37,8 +50,8 @@ const Closure : React.FC<ClosureProps> = ({incident, setIncident,isLoading, setI
     };
 
     return(
-        <div className="fixed inset-0 backdrop-blur-lg flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl border border-[#EAF6FF]">
+        <div className="fixed inset-0 backdrop-blur-lg flex items-center justify-center p-4 z-5">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl border border-[#EAF6FF] max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-start mb-1">
                     <div className="mb-4">
                         <h2 className="text-2xl font-bold text-gray-900">
@@ -50,7 +63,6 @@ const Closure : React.FC<ClosureProps> = ({incident, setIncident,isLoading, setI
                     </div>
                     <button onClick={() => {
                         reset()
-                        setAiSuggested(false)
                         setIncident(null)
                     }} className="text-[#232528] hover:text-[#FFA400] cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,9 +78,9 @@ const Closure : React.FC<ClosureProps> = ({incident, setIncident,isLoading, setI
                         {...register("status", { required: true })}
                         className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
                         >
-                            <option value="">Select</option>
+                            <option value="">Select incident finality</option>
                             <option value="resolved">Resolved</option>
-                            <option value="closed">Closed</option>
+                            <option value="closed">Not Resolved</option>
                         </select>
                     </div>
 
@@ -76,50 +88,7 @@ const Closure : React.FC<ClosureProps> = ({incident, setIncident,isLoading, setI
                     {status === "resolved" && (
                         <>
                         {/* AI Suggest Button */}
-                        {!aiSuggested && (
-                        <div className="flex justify-start mb-2">
-                            <button onClick={async ()=>{
-                                const incidentInfo : IncidentInfo = {
-                                    description: incident.description,
-                                    severity: incident.severity,
-                                    department: incident.department.name,
-                                }
-                                setAiSuggestionLoading(true);
-                                try{
-                                const suggestion : AISuggestion = await getAISuggestion(incidentInfo);
-                                if(suggestion.incident_type.includes('|')){
-                                    const incident_types = suggestion.incident_type.split('|').map(t => t.trim().toLowerCase());
-                                    setValue("incident_type", incident_types[0],{ shouldValidate: true, shouldDirty: true });
-                                }else{
-                                    setValue("incident_type", suggestion.incident_type.toLowerCase(),{ shouldValidate: true, shouldDirty: true });
-                                }
-                                
-                                if(suggestion.resolution_strategy_type.includes('|')){
-                                    const resolution_types = suggestion.resolution_strategy_type.split('|').map(t => t.trim().toLowerCase());
-                                    setValue("resolution_strategy_type", resolution_types[0],{ shouldValidate: true, shouldDirty: true });
-                                }else{
-                                    console.log(suggestion.resolution_strategy_type)
-                                    setValue("resolution_strategy_type", suggestion.resolution_strategy_type.toLowerCase(),{ shouldValidate: true, shouldDirty: true });
-                                }
-                                setValue("diagnosis", suggestion.diagnosis,{ shouldValidate: true, shouldDirty: true });
-                                setValue("recommendation", suggestion.recommendation,{ shouldValidate: true, shouldDirty: true });
-                                setValue("measure", suggestion.measure.join('\n'),{ shouldValidate: true, shouldDirty: true });
-                                setAiSuggested(true)
-                                }catch(error){
-                                    console.log(error)
-                                    alertService.error('Failed to get AI suggestion. Please try again later')
-                                }finally{
-                                    setAiSuggestionLoading(false);
-                                }
-                            }} type="button"
-                                disabled={aiSuggestionLoading}
-                                className={`px-3 py-1.5 text-sm font-medium rounded-md 
-                                    ${aiSuggestionLoading?'bg-gray-300 text-gray-500 py-2 cursor-disabled':'cursor-pointer bg-[#FFA400] text-white hover:bg-[#e69500] transition'}`}
-                            >
-                                {aiSuggestionLoading ? "Loading..." : "✨ Let AI Suggest"}
-                            </button>
-                        </div>)}
-
+                        <AISuggestionFeedback onLoadSuggestion={onLoadSuggestion} onFeedback={()=>{}} isLoading={aiSuggestionLoading} />
                         <div>
                             <label className="block text-sm font-medium mb-1">Incident Type</label>
                             <select {...register("incident_type", { required: true })} className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none">
@@ -151,7 +120,7 @@ const Closure : React.FC<ClosureProps> = ({incident, setIncident,isLoading, setI
                             <textarea
                             {...register("diagnosis")}
                             className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
-                            rows={2}
+                            rows={3}
                             />
                             {errors.diagnosis && <p className='text-red-500 text-xs mt-1'>{errors.diagnosis.message}</p>}
                         </div>
@@ -171,7 +140,7 @@ const Closure : React.FC<ClosureProps> = ({incident, setIncident,isLoading, setI
                             <textarea
                             {...register("recommendation")}
                             className="w-full rounded-md border border-gray-300 p-2 focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
-                            rows={2}
+                            rows={3}
                             />
                         </div>
                         </>
