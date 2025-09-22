@@ -5,6 +5,7 @@ import { alertService } from '@/lib/alert.service';
 import LocalsTable from './table';
 import {LocalEntity} from '@/lib/types/cms.types';
 import TableSkeleton from './skeleton';
+import Pagination from '../Pagination/file';
 
 type modalMode = 'create' | 'edit';
 
@@ -12,6 +13,7 @@ export default function Buildings(){
     const [buildings, setBuildings] = useState<LocalEntity[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [page,setPage] = useState<number>(1)
     const [modalState, setModalState] = useState<{
         open: boolean;
         mode: 'create' | 'edit';
@@ -71,7 +73,7 @@ export default function Buildings(){
 
     return(
         <>
-            <LocalsTable tabBody={buildings.map(building => [building._id, building.building_name])}
+            <LocalsTable tabBody={buildings.slice(((page - 1) * 5),(page * 5)).map(building => [building._id, building.building_name])}
                 tabHead={['ID', 'Name']} 
                 tabTitle='Buildings' 
                 buttonText='building' 
@@ -79,6 +81,7 @@ export default function Buildings(){
                 setEditModal={(building: LocalEntity) => handleEdit(building)}
                 entityType='building'
             />
+            <Pagination currentPage={page} totalPages={Math.ceil(buildings.length/5)} onPageChange={setPage} />
 
             {modalState.open && (
                 <ModalContent onClose={() => setModalState({ ...modalState, buildingData: null, open: false })} refreshBuildings={fetchBuildings}

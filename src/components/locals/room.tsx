@@ -5,6 +5,7 @@ import { alertService } from '@/lib/alert.service';
 import {LocalEntity,IFloor} from '@/lib/types/cms.types';
 import TableSkeleton from './skeleton';
 import React from 'react';
+import Pagination from '../Pagination/file';
 
 type modalMode = 'create' | 'edit';
 
@@ -32,8 +33,8 @@ export default function Rooms(){
     const [rooms, setRooms] = useState<RoomWithHierarchy[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
+    const [page, setPage] = useState<number>(1);
+
     const [modalState, setModalState] = useState<{
         open: boolean;
         mode: modalMode;
@@ -44,11 +45,6 @@ export default function Rooms(){
         RoomData: null
     });
 
-    // Pagination logic
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentRooms = rooms.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(rooms.length / itemsPerPage)
 
      // Fetch rooms
     const fetchRooms = async () => {
@@ -121,73 +117,58 @@ export default function Rooms(){
                         </tr>
                     </thead>
                     <tbody>
-                        {currentRooms.map((building) => (
-                        <React.Fragment key={building.building_name}>
-                            {/* Building row */}
-                            <tr className="bg-[#009FFD]">
-                                <td
-                                    colSpan={3}
-                                    className="px-4 py-2 text-left font-bold text-[#EAF6FF] text-base"
-                                >
-                                    {building.building_name}
-                                </td>
-                            </tr>
-
-                            {/* Floors under this building */}
-                            {building.floors.map((floor) => (
-                            <React.Fragment key={floor.floor_number}>
-                                {/* Floor row */}
-                                <tr className="bg-[#EAF6FF] border-t">
-                                    <td colSpan={3} className="px-6 py-2 text-sm font-semibold text-[#2A2A72]">
-                                        Etage {floor.floor_number}
+                        {rooms.slice(((page - 1) * 5),(page * 5)).map((building) => (
+                            <React.Fragment key={building.building_name}>
+                                {/* Building row */}
+                                <tr className="bg-[#009FFD]">
+                                    <td
+                                        colSpan={3}
+                                        className="px-4 py-2 text-left font-bold text-[#EAF6FF] text-base"
+                                    >
+                                        {building.building_name}
                                     </td>
                                 </tr>
 
-                                {/* Rooms under this floor */}
-                                {floor.rooms.map((room) => (
-                                <tr key={room._id} className="border-t hover:bg-gray-50 transition">
-                                    <td className="px-8 py-3 whitespace-nowrap text-sm text-[#232528]">
-                                        {room.room_number}
-                                    </td>
-                                    <td className="px-8 py-3 whitespace-nowrap text-sm text-[#232528]">
-                                    {room.department_id
-                                        ? room.department_id.department_id
-                                        : "N/A"}
-                                    </td>
-                                    <td className="px-8 py-3 whitespace-nowrap text-sm text-[#232528]">
-                                        <div className="flex space-x-3">
-                                            <button onClick={() => {}} className="text-[#FFA400] hover:text-[#e69500] font-medium">
-                                                Edit
-                                            </button>
-                                            <button className="text-red-500 hover:text-red-700 font-medium">
-                                                Delete
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                {/* Floors under this building */}
+                                {building.floors.map((floor) => (
+                                    <React.Fragment key={floor.floor_number}>
+                                        {/* Floor row */}
+                                        <tr className="bg-[#EAF6FF] border-t">
+                                            <td colSpan={3} className="px-6 py-2 text-sm font-semibold text-[#2A2A72]">
+                                                Etage {floor.floor_number}
+                                            </td>
+                                        </tr>
+
+                                        {/* Rooms under this floor */}
+                                        {floor.rooms.map((room) => (
+                                            <tr key={room._id} className="border-t hover:bg-gray-50 transition">
+                                                <td className="px-8 py-3 whitespace-nowrap text-sm text-[#232528]">
+                                                    {room.room_number}
+                                                </td>
+                                                <td className="px-8 py-3 whitespace-nowrap text-sm text-[#232528]">
+                                                {room.department_id
+                                                    ? room.department_id.department_id
+                                                    : "N/A"}
+                                                </td>
+                                                <td className="px-8 py-3 whitespace-nowrap text-sm text-[#232528]">
+                                                    <div className="flex space-x-3">
+                                                        <button onClick={() => {}} className="text-[#FFA400] hover:text-[#e69500] font-medium">
+                                                            Edit
+                                                        </button>
+                                                        <button className="text-red-500 hover:text-red-700 font-medium">
+                                                            Delete
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </React.Fragment>
                                 ))}
                             </React.Fragment>
-                            ))}
-                        </React.Fragment>
                         ))}
                     </tbody>
                 </table>
-
-
-                {/* Pagination controls */}
-                <div className="flex justify-between items-center mt-4">
-                    <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}
-                        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">
-                        Previous
-                    </button>
-                    <p className="text-sm text-gray-600">
-                        Page {currentPage} of {totalPages}
-                    </p>
-                    <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}
-                        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">
-                        Next
-                    </button>
-                </div>
+                <Pagination currentPage={page} onPageChange={setPage} totalPages={Math.ceil(rooms.length/5)}/>
             </div>
 
             {modalState.open && (

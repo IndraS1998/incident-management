@@ -8,6 +8,7 @@ import Select from "react-select";
 import { Button } from '@/components/button';
 import { Building2, Phone, DoorClosed, Users } from "lucide-react";
 import React from 'react';
+import Pagination from '@/components/Pagination/file';
 
 interface Department {
   _id: string;
@@ -75,6 +76,7 @@ export default function DepartmentTable() {
     const [rooms, setRooms] = useState<IRoom[]>([]);
     const [admins,setAdmins] = useState<Admin[]>([]);
     const [refreshCounter,setRefreshCounter] = useState(0);
+    const [page,setPage] = useState<number>(1)
 
     interface EditDepartmentFormData {
         rooms: string[];
@@ -245,20 +247,20 @@ export default function DepartmentTable() {
                                     {/* Details */}
                                     <div className="space-y-2 text-sm text-gray-700">
                                         <p className="flex items-center gap-2">
-                                        <Building2 className="w-4 h-4 text-[#2A2A72]" />
-                                        <span className="font-medium">Name:</span> {editDepartment.name}
+                                            <Building2 className="w-4 h-4 text-[#2A2A72]" />
+                                            <span className="font-medium">Name:</span> {editDepartment.name}
                                         </p>
                                         <p className="flex items-center gap-2">
-                                        <Phone className="w-4 h-4 text-[#FFA400]" />
-                                        <span className="font-medium">Contact:</span> {editDepartment.contact}
+                                            <Phone className="w-4 h-4 text-[#FFA400]" />
+                                            <span className="font-medium">Contact:</span> {editDepartment.contact}
                                         </p>
                                         <p className="flex items-center gap-2">
-                                        <DoorClosed className="w-4 h-4 text-[#009FFD]" />
-                                        <span className="font-medium">Rooms:</span> {editDepartment.roomCount}
+                                            <DoorClosed className="w-4 h-4 text-[#009FFD]" />
+                                            <span className="font-medium">Rooms:</span> {editDepartment.roomCount}
                                         </p>
                                         <p className="flex items-center gap-2">
-                                        <Users className="w-4 h-4 text-[#232528]" />
-                                        <span className="font-medium">Managers:</span> {editDepartment.managerCount}
+                                            <Users className="w-4 h-4 text-[#232528]" />
+                                            <span className="font-medium">Managers:</span> {editDepartment.managerCount}
                                         </p>
                                     </div>
                                 </div>
@@ -401,7 +403,7 @@ export default function DepartmentTable() {
                                 </tr>
                             </thead>
                             <tbody>
-                            {departments.map((dept) => (
+                            {departments.slice(((page - 1) * 10),(page * 10)).map((dept) => (
                                 <React.Fragment key={dept._id}>
                                     {/* Main Row */}
                                     <tr 
@@ -465,6 +467,7 @@ export default function DepartmentTable() {
                             ))}
                             </tbody>
                         </table>
+                        <Pagination currentPage={page} onPageChange={setPage} totalPages={Math.ceil(departments.length/10)}/>
                     </div>
                 </main>
             </div>

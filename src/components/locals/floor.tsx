@@ -4,6 +4,7 @@ import { useState,useEffect } from 'react';
 import { alertService } from '@/lib/alert.service';
 import TableSkeleton from './skeleton';
 import React from 'react';
+import Pagination from '../Pagination/file';
 
 type modalMode = 'create' | 'edit';
 
@@ -23,8 +24,7 @@ export default function Floors(){
     const [data, setData] = useState<BuildingGroup[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(10);
+    const [page,setPage] = useState<number>(1)
     const [modalState, setModalState] = useState<{
         open: boolean;
         mode: modalMode;
@@ -59,11 +59,6 @@ export default function Floors(){
         fetchFloors();
     }, []);
 
-     // Pagination logic
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentBuildings = data.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(data.length / itemsPerPage)
 
     const handleEdit = (floor: Floor) => {
         setModalState({
@@ -107,7 +102,7 @@ export default function Floors(){
                         </tr>
                     </thead>
                     <tbody>
-                    {currentBuildings.map((group) => (
+                    {data.slice(((page - 1) * 5),(page * 5)).map((group) => (
                         <React.Fragment key={group._id}>
                             {/* Building header row */}
                             <tr key={group._id} className="bg-[#EAF6FF] font-semibold">
@@ -138,21 +133,7 @@ export default function Floors(){
                     ))}
                     </tbody>
                 </table>
-
-                {/* Pagination controls */}
-                <div className="flex justify-between items-center mt-4">
-                    <button disabled={currentPage === 1} onClick={() => setCurrentPage((p) => p - 1)}
-                        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">
-                        Previous
-                    </button>
-                    <p className="text-sm text-gray-600">
-                        Page {currentPage} of {totalPages}
-                    </p>
-                    <button disabled={currentPage === totalPages} onClick={() => setCurrentPage((p) => p + 1)}
-                        className="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50">
-                        Next
-                    </button>
-                </div>
+                <Pagination currentPage={page} onPageChange={setPage} totalPages={Math.ceil(data.length/5)}/>
             </div>
 
             {modalState.open && (

@@ -4,6 +4,7 @@ import {useForm} from "react-hook-form";
 import Navbar from "@/components/navbar"
 import {alertService} from "@/lib/alert.service";
 import Footer from "@/components/footerComponent";
+import Pagination from "@/components/Pagination/file";
 
 enum AdminStatus {
   ACTIVE = 'active',
@@ -36,6 +37,7 @@ export default function AdministratorsManagement(){
     const [loading, setLoading] = useState(true);
     const { register, handleSubmit, formState: { errors },setValue,watch,reset } = useForm<IAdmin>();
     const [editingAdmin, setEditingAdmin] = useState<string | null>(null);
+    const [page,setPage] = useState<number>(1)
 
     async function fetchAdministrators() {
         try {
@@ -229,7 +231,7 @@ export default function AdministratorsManagement(){
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-[#EAF6FF]">
-                                    {administrators.map((admin) => (
+                                    {administrators.slice(((page - 1) * 5),(page * 5)).map((admin) => (
                                     <tr key={admin.admin_id} className="hover:bg-[#EAF6FF] hover:bg-opacity-30">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#232528]">
                                             {admin.admin_id}
@@ -324,6 +326,7 @@ export default function AdministratorsManagement(){
                                     ))}
                                 </tbody>
                             </table>
+                            <Pagination currentPage={page} totalPages={Math.ceil(administrators.length/5)} onPageChange={setPage}/>
                         </div>
                     </div>
                 </main>

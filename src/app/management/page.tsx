@@ -8,6 +8,7 @@ import { Incident,IAdmin } from '@/types/management/form';
 import { IncidentResolutionStatus,IncidentSeverity,IncidentType } from '@/types/management/enums';
 import Acknowledgement from '@/components/management/acknowlegement';
 import Closure from '@/components/management/closure';
+import Pagination from '@/components/Pagination/file';
 
 export default function IncidentManagement() {
     
@@ -16,6 +17,8 @@ export default function IncidentManagement() {
   const [pendingIncidents,setPendingIncidents] = useState<Incident[]>([]);
   const [isLoading,setIsLoading] = useState<boolean>(false);
   const [refreshCount,setRefreshCount] = useState<number>(0);
+  const [page,setPage] = useState<number>(1)
+  const [incidentPage,setIncidentPage] = useState<number>(1)
 
   const [filters, setFilters] = useState({
     status: '',
@@ -200,7 +203,7 @@ export default function IncidentManagement() {
               <div className="p-4">
                 {incidents.length > 0?
                 <ul className="space-y-3">
-                  {incidents.map((i) => (
+                  {incidents.slice(((incidentPage - 1) * 5),(incidentPage * 5)).map((i) => (
                     <li key={i._id} className="p-3 hover:bg-gray-50 rounded-lg transition-colors" onClick={()=>{setIncidentDetail(i)}}>
                       <div className="flex gap-3">
                         {/* Severity Indicator */}
@@ -247,6 +250,7 @@ export default function IncidentManagement() {
                   <span>No incident</span>
                   </div>}
               </div>
+              <Pagination currentPage={incidentPage} totalPages={Math.ceil(incidents.length/5)} onPageChange={setIncidentPage}/>
             </div>
 
             {/* Incidents Table (Right) - Keeping your existing table styling */}
@@ -273,7 +277,7 @@ export default function IncidentManagement() {
                         <tr><td className="px-6 py-4 whitespace-normal break-words text-sm font-medium text-[#232528]">No Incident</td></tr>
                       </tbody>}
                     <tbody className="bg-white divide-y divide-[#EAF6FF]">
-                      {pendingIncidents.map((incident) => (
+                      {pendingIncidents.slice((page - 1) * 5, page * 5).map((incident) => (
                         <tr key={incident._id} className="hover:bg-[#EAF6FF] hover:bg-opacity-30">
                           <td className="px-6 py-4 whitespace-normal break-words text-sm font-medium text-[#232528]">
                             {incident.description}
@@ -309,6 +313,7 @@ export default function IncidentManagement() {
                       ))}
                     </tbody>
                   </table>
+                  <Pagination  currentPage={page} totalPages={Math.ceil(pendingIncidents.length/5)} onPageChange={setPage}/>
                 </div>
               </div>
             </div>
