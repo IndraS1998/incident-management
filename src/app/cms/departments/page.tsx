@@ -9,6 +9,7 @@ import { Button } from '@/components/button';
 import { Building2, Phone, DoorClosed, Users } from "lucide-react";
 import React from 'react';
 import Pagination from '@/components/Pagination/file';
+import PageLoader from '@/components/loaders/pageLoaders';
 
 interface Department {
   _id: string;
@@ -225,9 +226,7 @@ export default function DepartmentTable() {
                     <div className="fixed inset-0 bg-white/30 bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-40">
                         <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
                             {loading && (
-                                <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-lg">
-                                    <div className="animate-spin rounded-full h-10 w-10 border-4 border-solid border-t-[#2A2A72] border-r-[#2A2A72] border-b-transparent border-l-transparent"></div>
-                                </div>
+                                <PageLoader />
                             )}
                             <div className="bg-[#2A2A72] text-white px-6 py-3 rounded-t-lg flex justify-between items-center">
                                 <h3 className="text-lg font-semibold">Edit Department</h3>
@@ -383,9 +382,7 @@ export default function DepartmentTable() {
                 <main className="container mx-auto p-4">
                     <h1 className="text-2xl font-bold text-[#232528] mb-6">Department Management</h1>
                     {loading && (
-                        <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-lg">
-                            <div className="animate-spin rounded-full h-10 w-10 border-4 border-solid border-t-[#2A2A72] border-r-[#2A2A72] border-b-transparent border-l-transparent"></div>
-                        </div>
+                        <PageLoader />
                     )}
                     <button className="px-4 py-2 mb-2 cursor-pointer bg-[#FFA400] hover:bg-[#e69500] text-white font-medium rounded-md transition-colors"
                         onClick={()=>setIsModalOpen(true)}
@@ -574,9 +571,7 @@ function ModalContent({onClose,refresh}:{onClose : () => void;refresh:()=>void})
             <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
                 {/* Loading overlay - only shown when loading */}
                 {loading && (
-                    <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-lg">
-                        <div className="animate-spin rounded-full h-10 w-10 border-4 border-solid border-t-[#2A2A72] border-r-[#2A2A72] border-b-transparent border-l-transparent"></div>
-                    </div>
+                    <PageLoader />
                 )}
                 <div className="bg-[#2A2A72] text-white px-6 py-3 rounded-t-lg flex justify-between items-center">
                     <h3 className="text-lg font-semibold">Create Department</h3>

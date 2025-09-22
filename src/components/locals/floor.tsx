@@ -5,6 +5,7 @@ import { alertService } from '@/lib/alert.service';
 import TableSkeleton from './skeleton';
 import React from 'react';
 import Pagination from '../Pagination/file';
+import PageLoader from '../loaders/pageLoaders';
 
 type modalMode = 'create' | 'edit';
 
@@ -216,9 +217,7 @@ function ModalContent({ onClose, refreshBuildings, mode = 'create', floorData = 
             <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
                 {/* Loading overlay - only shown when loading */}
                 {loading && (
-                    <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-lg">
-                        <div className="animate-spin rounded-full h-10 w-10 border-4 border-solid border-t-[#2A2A72] border-r-[#2A2A72] border-b-transparent border-l-transparent"></div>
-                    </div>
+                    <PageLoader />
                 )}
                 <div className="bg-[#2A2A72] text-white px-6 py-3 rounded-t-lg flex justify-between items-center">
                     <h3 className="text-lg font-semibold">{mode === 'create' ? 'Add New Floor' : 'Edit Floor'}</h3>

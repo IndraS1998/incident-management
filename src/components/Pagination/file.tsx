@@ -24,49 +24,49 @@ const Pagination: React.FC<PaginationProps> = ({
     };
 
     return (
-        <div className="flex items-center justify-center gap-2 mt-4">
-        {/* Previous Button */}
-        <button
-            onClick={() => handleClick(currentPage - 1)}
-            disabled={currentPage === 1}
-            className={`px-3 py-1 rounded-md border text-sm transition-colors
-            ${
-                currentPage === 1
-                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                : "bg-white border-gray-300 text-[#2A2A72] hover:bg-[#FFA400] hover:text-white cursor-pointer"
-            }`}
-        >
-            Prev
-        </button>
-
-        {/* Page Numbers */}
-        {pages.map((page) => (
+        <div className="flex items-center justify-center gap-2 my-4">
+            {/* Previous Button */}
             <button
-            key={page}
-            onClick={() => handleClick(page)}
-            className={`px-3 py-1 rounded-md border text-sm transition-colors ${
-                currentPage === page
-                ? "bg-[#2A2A72] text-white border-[#2A2A72]"
-                : "bg-white border-gray-300 text-[#2A2A72] hover:bg-[#FFA400] hover:text-white cursor-pointer"
-            }`}
+                onClick={() => handleClick(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`px-3 py-1 rounded-md border text-sm transition-colors
+                ${
+                    currentPage === 1
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-white border-gray-300 text-[#2A2A72] hover:bg-[#FFA400] hover:text-white cursor-pointer"
+                }`}
             >
-            {page}
+                Prev
             </button>
-        ))}
 
-        {/* Next Button */}
-        <button
-            onClick={() => handleClick(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className={`px-3 py-1 rounded-md border text-sm transition-colors
-            ${
-                currentPage === totalPages
-                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                : "bg-white border-gray-300 text-[#2A2A72] hover:bg-[#FFA400] hover:text-white cursor-pointer"
-            }`}
-        >
-            Next
-        </button>
+            {/* Page Numbers */}
+            {pages.map((page) => (
+                <button
+                key={page}
+                onClick={() => handleClick(page)}
+                className={`px-3 py-1 rounded-md border text-sm transition-colors ${
+                    currentPage === page
+                    ? "bg-[#2A2A72] text-white border-[#2A2A72]"
+                    : "bg-white border-gray-300 text-[#2A2A72] hover:bg-[#FFA400] hover:text-white cursor-pointer"
+                }`}
+                >
+                {page}
+                </button>
+            ))}
+
+            {/* Next Button */}
+            <button
+                onClick={() => handleClick(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-1 rounded-md border text-sm transition-colors
+                ${
+                    currentPage === totalPages
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-white border-gray-300 text-[#2A2A72] hover:bg-[#FFA400] hover:text-white cursor-pointer"
+                }`}
+            >
+                Next
+            </button>
         </div>
     );
 };

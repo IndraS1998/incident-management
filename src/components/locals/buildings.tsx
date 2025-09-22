@@ -6,6 +6,7 @@ import LocalsTable from './table';
 import {LocalEntity} from '@/lib/types/cms.types';
 import TableSkeleton from './skeleton';
 import Pagination from '../Pagination/file';
+import { fetchData } from '@/lib/functions';
 
 type modalMode = 'create' | 'edit';
 
@@ -14,6 +15,7 @@ export default function Buildings(){
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [page,setPage] = useState<number>(1)
+
     const [modalState, setModalState] = useState<{
         open: boolean;
         mode: 'create' | 'edit';
@@ -26,21 +28,9 @@ export default function Buildings(){
 
     // Fetch buildings
     const fetchBuildings = async () => {
-        try {
-            setLoading(true);
-            const res = await fetch('/api/locals/buildings');
-            if (!res.ok){
-                alertService.error('Failed to fetch buildings');
-                setError(await res.text());
-                return;
-            }
-            const data = await res.json();
+        const data = await fetchData('/api/locals/buildings',setLoading)
+        if(data){
             setBuildings(data);
-        } catch (err) {
-            alertService.error('Failed to fetch buildings');
-            setError(err instanceof Error ? err.message : 'Unknown error');
-        } finally {
-            setLoading(false);
         }
     };
 

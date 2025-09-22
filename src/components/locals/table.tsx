@@ -42,6 +42,12 @@ export default function LocalsTable({
 
     return (
         <>
+            {/* Add New Button */}
+            <div className="mt-1 mb-3 flex justify-start">
+                <button onClick={setCreationModal} className="px-4 py-2 bg-[#FFA400] hover:bg-[#e69500] text-white font-medium rounded-md capitalize cursor-pointer">
+                    + Add New {buttonText}
+                </button>
+            </div>
             <div className="bg-white rounded-lg shadow-sm border border-[#EAF6FF] overflow-hidden">
                 {/* Table Header */}
                 <div className="bg-[#2A2A72] bg-opacity-50 px-6 py-3 border-b border-[#EAF6FF]">
@@ -98,13 +104,6 @@ export default function LocalsTable({
                         </tbody>
                     </table>
                 </div>
-            </div>
-
-            {/* Add New Button */}
-            <div className="mt-4 flex justify-end">
-                <button onClick={setCreationModal} className="px-4 py-2 bg-[#FFA400] hover:bg-[#e69500] text-white font-medium rounded-md capitalize cursor-pointer">
-                    + Add New {buttonText}
-                </button>
             </div>
         </>
     );

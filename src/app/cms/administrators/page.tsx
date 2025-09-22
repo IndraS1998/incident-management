@@ -5,6 +5,8 @@ import Navbar from "@/components/navbar"
 import {alertService} from "@/lib/alert.service";
 import Footer from "@/components/footerComponent";
 import Pagination from "@/components/Pagination/file";
+import PageLoader from "@/components/loaders/pageLoaders";
+import { fetchData } from "@/lib/functions";
 
 enum AdminStatus {
   ACTIVE = 'active',
@@ -40,32 +42,23 @@ export default function AdministratorsManagement(){
     const [page,setPage] = useState<number>(1)
 
     async function fetchAdministrators() {
-        try {
-            const response = await fetch('/api/administrators');
-            if (!response.ok) {
-                alertService.error("Failed to fetch administrators");
-                return;
-            }
-            const data = await response.json();
+        const data = await fetchData('/api/administrators',setLoading)
+        if(data){
             setAdministrators(data);
-        } catch (error) {
-            console.error('Error fetching administrators:', error);
         }
     }
 
     useEffect(() => {
-        setLoading(true)
         fetchAdministrators();
-        setLoading(false);
     }, []);
 
     const handleEdit = (admin: IAdmin) => {
-    setEditingAdmin(admin.admin_id);
-    // Set all form values for editing
-    Object.entries(admin).forEach(([key, value]) => {
-      setValue(key as keyof IAdmin, value);
-    });
-  };
+        setEditingAdmin(admin.admin_id);
+        // Set all form values for editing
+        Object.entries(admin).forEach(([key, value]) => {
+        setValue(key as keyof IAdmin, value);
+        });
+    };
 
   const handleSave = async (adminId: string) => {
     setLoading(true);
@@ -104,9 +97,7 @@ export default function AdministratorsManagement(){
             <div className="min-h-screen bg-[#EAF6FF]">
                 <Navbar/>
                 {loading && (
-                    <div className="absolute inset-0 bg-white/70 backdrop-blur-[2px] z-10 flex items-center justify-center rounded-lg">
-                        <div className="animate-spin rounded-full h-10 w-10 border-4 border-solid border-t-[#2A2A72] border-r-[#2A2A72] border-b-transparent border-l-transparent"></div>
-                    </div>
+                    <PageLoader/>
                 )}
                 <main className="container mx-auto p-4">
                     <h1 className="text-2xl font-bold text-[#232528] mb-6">Administrator Management</h1>
