@@ -153,9 +153,6 @@ export default function Rooms(){
                                                 </td>
                                                 <td className="px-8 py-3 whitespace-nowrap text-sm text-[#232528]">
                                                     <div className="flex space-x-3">
-                                                        <button onClick={() => {}} className="text-[#FFA400] hover:text-[#e69500] font-medium">
-                                                            Edit
-                                                        </button>
                                                         <button className="text-red-500 hover:text-red-700 font-medium">
                                                             Delete
                                                         </button>

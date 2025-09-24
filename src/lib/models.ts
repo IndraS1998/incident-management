@@ -19,7 +19,7 @@ enum IncidentType {
   OTHER = 'other'
 }
 
-enum IncidentSeverity{
+enum IncidentSeverity {
   LOW = 'low',
   MEDIUM = 'medium',
   HIGH = 'high',

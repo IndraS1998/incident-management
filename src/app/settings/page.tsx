@@ -34,6 +34,7 @@ export default function Settings() {
     const { register, handleSubmit, formState: { errors },setValue,watch,reset } = useForm<IAdmin>();
     const [loading,setLoading] = useState<boolean>(false)
     const [activeAdmin,setActiveAdmin] = useState<IAdmin | null>(null)
+    const [displayForm,setDisplayForm] = useState<boolean>(false)
     const r = useRouter()
 
     useEffect(()=>{
@@ -55,159 +56,179 @@ export default function Settings() {
                 <Navbar />
                 <main className="container mx-auto px-4">
                     <h1 className="text-2xl font-bold text-[#232528] my-6">Administrator Settings</h1>
-                    <form onSubmit={handleSubmit(async formData =>{
-                        setLoading(true);
-                        try{
-                            
-                            const response = await fetch('/api/administrators', {
-                                method: 'PUT',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify(formData),
-                            });
-                            if (!response.ok) {
-                                alertService.error("Failed to create administrator");
-                                return;
-                            }
-                            const data = await response.json();
-                            alertService.success("Administrator updated successfully");
-                            localStorage.removeItem('admin_user');
-                            localStorage.setItem('admin_user', JSON.stringify(data.updatedAdmin));
-                            setActiveAdmin(data.updatedAdmin);
-                        }catch(error){
-                            console.error('Error updating administrator:', error);
-                            alertService.error("Oops! Something went wrong");
-                        }finally{
-                            setLoading(false);
-                        }
-                    })} 
-                    className="bg-white p-4 rounded-lg shadow-md mb-6 border border-[#EAF6FF]">
-                        <h2 className="text-lg font-semibold text-[#232528] mb-4">Administrator Details</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            {/* Disabled Fields Section */}
-                            <div className="md:col-span-4 border-b border-[#2A2A72]/20 pb-4 mb-4">
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-[#232528] mb-1">Full Name</label>
-                                        <input
-                                        disabled
-                                        type="text"
-                                        className="w-full p-2 border border-[#EAF6FF] bg-[#EAF6FF]/30 rounded focus:outline-none cursor-not-allowed"
-                                        placeholder="Full Name"
-                                        {...register("name", { required: true })}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-[#232528] mb-1">Email</label>
-                                        <input
-                                        disabled
-                                        type="email"
-                                        className="w-full p-2 border border-[#EAF6FF] bg-[#EAF6FF]/30 rounded focus:outline-none cursor-not-allowed"
-                                        placeholder="Email"
-                                        {...register("email", { required: true })}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-[#232528] mb-1">Role</label>
-                                        <input
-                                        disabled
-                                        type="text"
-                                        className="w-full p-2 border border-[#EAF6FF] bg-[#EAF6FF]/30 rounded focus:outline-none cursor-not-allowed"
-                                        placeholder="Role"
-                                        {...register("role", { required: true })}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-[#232528] mb-1">Status</label>
-                                        <input
-                                        disabled
-                                        type="text"
-                                        className="w-full p-2 border border-[#EAF6FF] bg-[#EAF6FF]/30 rounded focus:outline-none cursor-not-allowed"
-                                        placeholder="Status"
-                                        {...register("status", { required: true })}
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Editable Fields Section */}
-                            <h3 className="text-lg font-semibold text-[#232528] mb-4">Edit Fields</h3>
-                            <div className="md:col-span-4">
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                    <div>
-                                        <label className="block text-sm font-medium text-[#232528] mb-1">Phone</label>
-                                        <input
-                                        type="text"
-                                        className="w-full p-2 border border-[#EAF6FF] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
-                                        placeholder="Phone contact"
-                                        {...register("phone", { required: true })}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-[#232528] mb-1">Password</label>
-                                        <input
-                                            type="password"
-                                            className="w-full p-2 border border-[#EAF6FF] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
-                                            placeholder="Password"
-                                            {...register("password_hash", { required: true })}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-[#232528] mb-1">Confirm Password</label>
-                                        <input
-                                            type="password"
-                                            className="w-full p-2 border border-[#EAF6FF] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
-                                            placeholder="Confirm Password"
-                                            {...register("confirm_password", {
-                                                required: "Please confirm your password",
-                                                validate: (value) => 
-                                                    value === watch('password_hash') || "Passwords do not match"
-                                                })
-                                            }
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="py-6 space-y-4 grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <button disabled={loading} type="submit"
-                                className={`cursor-pointer inline-flex justify-center items-center py-2.5 px-6 bg-[#FFA400] hover:bg-[#e69500]
-                                        text-white font-medium rounded-md transition duration-200 ${loading ? 'pointer-events-none opacity-90' : ''}`}>
-                                {loading ? (
-                                <div className="flex items-center justify-center">
-                                    <svg
-                                    className="animate-spin h-5 w-5 text-white"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    >
-                                    <circle
-                                        className="opacity-25"
-                                        cx="12"
-                                        cy="12"
-                                        r="10"
-                                        stroke="currentColor"
-                                        strokeWidth="4"
-                                    ></circle>
-                                    <path
-                                        className="opacity-75"
-                                        fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                    ></path>
-                                    </svg>
-                                </div>
-                                ) : (
-                                'Update'
-                                )}
+                    <div className="bg-white p-4 rounded-lg shadow-md mb-6 border border-[#EAF6FF]">    
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-lg font-semibold text-[#232528]">Administrator Details</h2>
+                            <button onClick={() => setDisplayForm(!displayForm)} 
+                            className="text-sm text-[#232528] hover:text-[#FFA400] focus:outline-none cursor-pointer"
+                            >
+                            {displayForm ? (
+                                <span className="flex items-center">
+                                Hide form
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                </svg>
+                                </span>
+                            ) :(
+                                <span className="flex items-center">
+                                Show form
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                                </span>
+                            )}
                             </button>
                         </div>
-                    </form>
+                        {displayForm && (
+                             <form onSubmit={handleSubmit(async formData =>{
+                                setLoading(true);
+                                try{
+                                    
+                                    const response = await fetch('/api/administrators', {
+                                        method: 'PUT',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify(formData),
+                                    });
+                                    if (!response.ok) {
+                                        alertService.error("Failed to create administrator");
+                                        return;
+                                    }
+                                    const data = await response.json();
+                                    alertService.success("Administrator updated successfully");
+                                    localStorage.removeItem('admin_user');
+                                    localStorage.setItem('admin_user', JSON.stringify(data.updatedAdmin));
+                                    setActiveAdmin(data.updatedAdmin);
+                                }catch(error){
+                                    console.error('Error updating administrator:', error);
+                                    alertService.error("Oops! Something went wrong");
+                                }finally{
+                                    setLoading(false);
+                                }
+                            })} >
+                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    {/* Disabled Fields Section */}
+                                    <div className="md:col-span-4 border-b border-[#2A2A72]/20 pb-4 mb-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-[#232528] mb-1">Full Name</label>
+                                                <input
+                                                disabled
+                                                type="text"
+                                                className="w-full p-2 border border-[#EAF6FF] bg-[#EAF6FF]/30 rounded focus:outline-none cursor-not-allowed"
+                                                placeholder="Full Name"
+                                                {...register("name", { required: true })}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-[#232528] mb-1">Role</label>
+                                                <input
+                                                disabled
+                                                type="text"
+                                                className="w-full p-2 border border-[#EAF6FF] bg-[#EAF6FF]/30 rounded focus:outline-none cursor-not-allowed"
+                                                placeholder="Role"
+                                                {...register("role", { required: true })}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-[#232528] mb-1">Status</label>
+                                                <input
+                                                disabled
+                                                type="text"
+                                                className="w-full p-2 border border-[#EAF6FF] bg-[#EAF6FF]/30 rounded focus:outline-none cursor-not-allowed"
+                                                placeholder="Status"
+                                                {...register("status", { required: true })}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Editable Fields Section */}
+                                    <h3 className="text-lg font-semibold text-[#232528] mb-4">Edit Fields</h3>
+                                    <div className="md:col-span-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-[#232528] mb-1">Email</label>
+                                                <input type="email" className="w-full p-2 border border-[#EAF6FF] bg-[#EAF6FF]/30 rounded focus:outline-none"
+                                                placeholder="Email" {...register("email", { required: true })}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-[#232528] mb-1">Phone</label>
+                                                <input
+                                                type="text"
+                                                className="w-full p-2 border border-[#EAF6FF] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
+                                                placeholder="Phone contact"
+                                                {...register("phone", { required: true })}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-[#232528] mb-1">Password</label>
+                                                <input
+                                                    type="password"
+                                                    className="w-full p-2 border border-[#EAF6FF] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
+                                                    placeholder="Password"
+                                                    {...register("password_hash", { required: true })}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <label className="block text-sm font-medium text-[#232528] mb-1">Confirm Password</label>
+                                                <input
+                                                    type="password"
+                                                    className="w-full p-2 border border-[#EAF6FF] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
+                                                    placeholder="Confirm Password"
+                                                    {...register("confirm_password", {
+                                                        required: "Please confirm your password",
+                                                        validate: (value) => 
+                                                            value === watch('password_hash') || "Passwords do not match"
+                                                        })
+                                                    }
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="py-6 space-y-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                                    <button disabled={loading} type="submit"
+                                        className={`cursor-pointer inline-flex justify-center items-center py-2.5 px-6 bg-[#FFA400] hover:bg-[#e69500]
+                                                text-white font-medium rounded-md transition duration-200 ${loading ? 'pointer-events-none opacity-90' : ''}`}>
+                                        {loading ? (
+                                        <div className="flex items-center justify-center">
+                                            <svg
+                                            className="animate-spin h-5 w-5 text-white"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            ></circle>
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            ></path>
+                                            </svg>
+                                        </div>
+                                        ) : (
+                                        'Update'
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
+                        )}
+                        
+                    </div>
+                    
                     <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6 pb-10">
                         {/* Departments Section */}
                         <div className="bg-white rounded-lg shadow-sm border border-[#EAF6FF] overflow-hidden">

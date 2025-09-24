@@ -51,25 +51,6 @@ export async function POST(request: Request) {
     }
 }
 
-export async function PATCH(request: Request) {
-    try {
-        const { _id, floor_number, building_name } = await request.json();
-        await connectDatabase();
-        const updatedFloor = await Floor.findByIdAndUpdate(
-            _id,
-            { floor_number, building_name },
-            { new: true }
-        );
-        if (!updatedFloor) {
-            return NextResponse.json({ success: false, message: 'Floor not found' }, { status: 404 });
-        }
-        return NextResponse.json({ success: true, message: 'Floor updated successfully' });
-    } catch (error) {
-        console.error('Error updating floor:', error);
-        return NextResponse.json({ success: false, message: 'Failed to update floor' }, { status: 500 });
-    }
-}
-
 export async function DELETE(request: Request) {
     try {
         const { _id } = await request.json();

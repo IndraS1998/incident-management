@@ -5,15 +5,26 @@ import Footer from "@/components/footerComponent";
 import { fetchData } from '@/lib/functions';
 import { timeSince } from '@/lib/functions';
 import { Incident,IAdmin } from '@/types/management/form';
-import { IncidentResolutionStatus,IncidentSeverity,IncidentType } from '@/types/management/enums';
+import { IncidentSeverity } from '@/types/management/enums';
 import Acknowledgement from '@/components/management/acknowlegement';
 import Closure from '@/components/management/closure';
 import Pagination from '@/components/Pagination/file';
 import PageLoader from '@/components/loaders/pageLoaders';
+import FilterIncidents from '@/components/management/filterIncidents';
+
+function sortIncidentBySeverity(incidents:Incident[]): Incident[]{
+  const severityMagnitude = {
+    [IncidentSeverity.CRITICAL] : 4,
+    [IncidentSeverity.HIGH]: 3,
+    [IncidentSeverity.MEDIUM]: 2,
+    [IncidentSeverity.LOW] : 1,
+  }
+
+  return [...incidents].sort((a,b) => {return severityMagnitude[b.severity] - severityMagnitude[a.severity]})
+}
 
 export default function IncidentManagement() {
     
-  const [isFilterDisplayed,setIsFilterDisplayed] = useState<boolean>(false)
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [pendingIncidents,setPendingIncidents] = useState<Incident[]>([]);
   const [isLoading,setIsLoading] = useState<boolean>(false);
@@ -21,14 +32,6 @@ export default function IncidentManagement() {
   const [page,setPage] = useState<number>(1)
   const [incidentPage,setIncidentPage] = useState<number>(1)
 
-  const [filters, setFilters] = useState({
-    status: '',
-    urgency: '',
-    type: '',
-    startDate: '',
-    endDate: '',
-    searchQuery: ''
-  });
 
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [incidentDetail,setIncidentDetail] = useState<Incident | null>(null);
@@ -36,21 +39,23 @@ export default function IncidentManagement() {
   async function fetchIncidents(role:string,admin_id: string|null){
     let data
     if(role === 'superadmin'){
-        data = await fetchData(`/api/incidents/admin?count=false`,setIsLoading);
+      data = await fetchData(`/api/incidents/admin?count=false`,setIsLoading);
     }else{
-        data = await fetchData(`/api/incidents?adminId=${admin_id}&count=false`,setIsLoading);
+      data = await fetchData(`/api/incidents?adminId=${admin_id}&count=false`,setIsLoading);
     }
-    setIncidents(data)
+    const sortedData = sortIncidentBySeverity(data)
+    setIncidents(sortedData)
   }
 
   async function fetchPendingIncidents(role:string,admin_id: string|null){
-    let data
+    let data : Incident[] 
     if(role === 'superadmin'){
-      data = await fetchData(`/api/incidents/admin/pending?count=false`,setIsLoading);
+      data  = await fetchData(`/api/incidents/admin/pending?count=false`,setIsLoading);
     }else{
       data = await fetchData(`/api/incidents/pending?adminId=${admin_id}&count=false`,setIsLoading);
     }
-    setPendingIncidents(data)
+    const sortedData = sortIncidentBySeverity(data)
+    setPendingIncidents(sortedData)
   }
   
   useEffect(()=>{
@@ -72,119 +77,7 @@ export default function IncidentManagement() {
         <main className="container mx-auto p-4">
           <h1 className="text-2xl font-bold text-[#232528] my-6">Incident Management</h1>
           {/* Filters Section */}
-          <div className="bg-white p-4 rounded-lg shadow-md mb-6 border border-[#EAF6FF]">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-[#232528]">Filter Incidents</h2>
-              <button 
-                onClick={() => setIsFilterDisplayed(!isFilterDisplayed)}
-                className="text-sm text-[#232528] hover:text-[#FFA400] focus:outline-none cursor-pointer"
-              >
-                {isFilterDisplayed ? (
-                  <span className="flex items-center">
-                    Hide filter
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                    </svg>
-                  </span>
-                ) :(
-                  <span className="flex items-center">
-                    Show filter
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </span>
-                )}
-              </button>
-            </div>
-
-            {isFilterDisplayed && (
-              <>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  {/* Status Filter */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#232528] mb-1">Statut</label>
-                    <select 
-                      className="w-full p-2 border border-[#EAF6FF] rounded"
-                      value={filters.status}
-                      onChange={(e) => setFilters({...filters, status: e.target.value as IncidentResolutionStatus})}
-                    >
-                      <option value="">Tous</option>
-                      <option value="En attente">En attente</option>
-                      <option value="En cours">En cours</option>
-                      <option value="Résolu">Résolu</option>
-                      <option value="Rejeté">Rejeté</option>
-                    </select>
-                  </div>
-
-                  {/* Urgency Filter */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#232528] mb-1">Urgence</label>
-                    <select 
-                      className="w-full p-2 border border-[#EAF6FF] rounded"
-                      value={filters.urgency}
-                      onChange={(e) => setFilters({...filters, urgency: e.target.value as IncidentSeverity})}
-                    >
-                      <option value="">Tous</option>
-                      <option value="Faible">Faible</option>
-                      <option value="Modéré">Modéré</option>
-                      <option value="Élevé">Élevé</option>
-                      <option value="Critique">Critique</option>
-                    </select>
-                  </div>
-
-                  {/* Type Filter */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#232528] mb-1">Type</label>
-                    <select 
-                      className="w-full p-2 border border-[#EAF6FF] rounded"
-                      value={filters.type}
-                      onChange={(e) => setFilters({...filters, type: e.target.value as IncidentType})}
-                    >
-                      <option value="">Tous</option>
-                      <option value="Matériel">Matériel</option>
-                      <option value="Applicatifs">Applicatifs</option>
-                      <option value="Réseau">Réseau</option>
-                      <option value="Autre">Autre</option>
-                    </select>
-                  </div>
-
-                  {/* Search */}
-                  <div>
-                    <label className="block text-sm font-medium text-[#232528] mb-1">Recherche</label>
-                    <input
-                      type="text"
-                      className="w-full p-2 border border-[#EAF6FF] rounded"
-                      placeholder="Rechercher..."
-                      value={filters.searchQuery}
-                      onChange={(e) => setFilters({...filters, searchQuery: e.target.value})}
-                    />
-                  </div>
-                </div>
-
-                {/* Date Range Filter */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  <div>
-                    <label className="block text-sm font-medium text-[#232528] mb-1">Date de début</label>
-                    <input
-                      type="date"
-                      className="w-full p-2 border border-[#EAF6FF] rounded"
-                      value={filters.startDate}
-                      onChange={(e) => setFilters({...filters, startDate: e.target.value})}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-[#232528] mb-1">Date de fin</label>
-                    <input
-                      type="date"
-                      className="w-full p-2 border border-[#EAF6FF] rounded"
-                      value={filters.endDate}
-                      onChange={(e) => setFilters({...filters, endDate: e.target.value})}
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+          <FilterIncidents setIncidents={setPendingIncidents} setIsLoading={setIsLoading}/>
 
           {/* Aside Table */}
           <div className="flex flex-col md:flex-row gap-6 h-full">

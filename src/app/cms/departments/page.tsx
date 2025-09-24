@@ -10,6 +10,7 @@ import { Building2, Phone, DoorClosed, Users } from "lucide-react";
 import React from 'react';
 import Pagination from '@/components/Pagination/file';
 import PageLoader from '@/components/loaders/pageLoaders';
+import { fetchData } from '@/lib/functions';
 
 interface Department {
   _id: string;
@@ -99,21 +100,8 @@ export default function DepartmentTable() {
     }));
     
     async function fetchDepartments(){
-        setLoading(true)
-        try{
-            const response = await fetch('/api/departments')
-            if(!response.ok){
-                alertService.error("Failed to fetch departments")
-                return
-            }
-            const data = await response.json()
-            setDepartments(data)
-        }catch(error){
-            alertService.error("Failed to fetch departments");
-            console.log('Error fetching departments:', error);
-        }finally{
-            setLoading(false)
-        }
+        const response = await fetchData('/api/departments',setLoading)
+        if(response) setDepartments(response)
     }
 
     async function fetchRelevantAdmins(){

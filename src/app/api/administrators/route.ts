@@ -44,10 +44,10 @@ export async function PATCH(req: Request){
 
 export async function PUT(req: Request){
     try{
-        const {_id,password_hash,phone} = await req.json();
+        const {_id,password_hash,phone,email} = await req.json();
         await connectDatabase();
         // Update the administrator in the database
-        const updatedAdmin = await Admin.findByIdAndUpdate(_id, { password_hash, phone }, { new: true });
+        const updatedAdmin = await Admin.findByIdAndUpdate(_id, { password_hash, phone, email }, { new: true });
         return NextResponse.json({ updatedAdmin, success: true, message: 'Administrator updated successfully' });
     }catch(error){
         console.log(error)

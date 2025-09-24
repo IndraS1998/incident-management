@@ -60,15 +60,6 @@ export default function Floors(){
         fetchFloors();
     }, []);
 
-
-    const handleEdit = (floor: Floor) => {
-        setModalState({
-            open: true,
-            mode: 'edit',
-            FloorData: floor 
-        });
-    };
-
     if (loading){
         return (
             <div className="space-y-6">
@@ -119,10 +110,6 @@ export default function Floors(){
                                     <td className="px-4 py-2">{floor.floor_number}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-[#232528]">
                                         <div className="flex space-x-2">
-                                            <button onClick={() =>{handleEdit(floor)}}
-                                                className="text-[#FFA400] hover:text-[#e69500] cursor-pointer">
-                                                Edit
-                                            </button>
                                             <button className="text-red-500 hover:text-red-700 cursor-pointer">
                                                 Delete
                                             </button>

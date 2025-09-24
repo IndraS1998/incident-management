@@ -69,4 +69,9 @@ interface ClosureProps{
   refreshCount:number;
   isLoading:boolean;
 }
-export type {IncidentUpdateFormProps,IAdmin,Incident,IDepartment,AIProposalForm,AcknowledgementProps,ClosureProps}
+
+interface FilterIncidentsProps{
+  setIncidents: React.Dispatch<React.SetStateAction<Incident[]>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}
+export type {IncidentUpdateFormProps,IAdmin,Incident,IDepartment,AIProposalForm,AcknowledgementProps,ClosureProps,FilterIncidentsProps}
