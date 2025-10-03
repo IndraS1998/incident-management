@@ -4,9 +4,9 @@ import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 import { fetchData } from '@/lib/functions';
 import { 
-  Cog6ToothIcon, ArrowLeftOnRectangleIcon, ChevronDownIcon ,BuildingOffice2Icon,Bars3Icon, XMarkIcon
+  Cog6ToothIcon, ArrowLeftOnRectangleIcon, ChevronDownIcon ,BuildingOffice2Icon,Bars3Icon, XMarkIcon, CpuChipIcon
 } from '@heroicons/react/24/outline';
-import { UserCircleIcon,Squares2X2Icon } from '@heroicons/react/24/solid';
+import { UserCircleIcon,Squares2X2Icon,WrenchIcon,ComputerDesktopIcon } from '@heroicons/react/24/solid';
 import { Transition } from "@headlessui/react";
 
 
@@ -39,12 +39,15 @@ export default function Navbar(){
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isContentManagementOpen,setIsContentManagenentOpen] = useState(false)
     const [contentMobileMode,setContentMobileMode] = useState(false)
+    const [isAssetManagementOpen,setIsAssetManagementOpen] = useState(false)
+    const [assetContentMobileMode,setAssetContentMobileMode] = useState(false)
     const [incidentCount,setIncidentcount] = useState<number>(0)
     const [isLoading,setIsLoading] = useState<boolean>(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const dropdownSettingsRef = useRef<HTMLDivElement>(null);
     const dropdownContentManagementRef = useRef<HTMLDivElement>(null);
+    const dropdownAssetManagementRef = useRef<HTMLDivElement>(null);
 
     const [admin,setAdmin] = useState<IAdmin | null>(null);
 
@@ -96,6 +99,9 @@ export default function Navbar(){
         }
         if (dropdownContentManagementRef.current && !dropdownContentManagementRef.current.contains(event.target as Node)) {
           setIsContentManagenentOpen(false);
+        }
+        if (dropdownAssetManagementRef.current && !dropdownAssetManagementRef.current.contains(event.target as Node)) {
+          setIsAssetManagementOpen(false);
         }
       };
 
@@ -186,10 +192,38 @@ export default function Navbar(){
                                     )}
                                 </div>
                                 )}
+                                {admin?.role === "superadmin" && (
+                                <div>
+                                    <button
+                                        onClick={() => setAssetContentMobileMode(!assetContentMobileMode)}
+                                        className="flex items-center space-x-2 w-full font-medium hover:text-[#FFA400]"
+                                    >
+                                        <span>Asset Management</span>
+                                        <ChevronDownIcon
+                                            className={`h-4 w-4 transition-transform ${assetContentMobileMode ? "rotate-180" : ""
+                                            }`}
+                                        />
+                                    </button>
+
+                                    {assetContentMobileMode && (
+                                    <div className="mt-2 space-y-2 pl-4">
+                                        <Link href="/IT_assets" onClick={() => setIsMenuOpen(false)} className="block text-sm text-gray-700 hover:text-[#FFA400]">
+                                            Dashboard
+                                        </Link>
+                                        <Link href="/IT_assets/management" onClick={() => setIsMenuOpen(false)} className="block text-sm text-gray-700 hover:text-[#FFA400]">
+                                            Management
+                                        </Link>
+                                        <Link href="/IT_assets/asset_type" onClick={() => setIsMenuOpen(false)} className="block text-sm text-gray-700 hover:text-[#FFA400]">
+                                            Asset types
+                                        </Link>
+                                    </div>
+                                    )}
+                                </div>
+                                )}
                             </nav>
                         </div>
                     </Transition>
-                    <h1 className="text-2xl font-bold">Incident Reporting</h1>
+                    <h1 className="text-2xl font-bold">IRIS</h1>
 
                     {/* Desktop view */}
                     <nav className="hidden lg:flex items-center space-x-6">
@@ -250,38 +284,73 @@ export default function Navbar(){
                                 </div>
                             )
                         }
-                        
+                        {
+                            admin?.role === 'superadmin' && (
+                                <div className="flex items-center space-x-4">
+                                    <div className="relative" ref={dropdownAssetManagementRef}>
+                                        <button
+                                            onClick={() => setIsAssetManagementOpen(!isAssetManagementOpen)}
+                                            className={`flex cursor-pointer items-center space-x-2 hover:text-[#FFA400] focus:outline-none ${
+                                                pathname.startsWith('/IT_assets') ? 'text-[#FFA400]' : ''
+                                            }`}
+                                        >
+                                            <span className="font-medium hidden sm:inline">Asset Management</span>
+                                            <ChevronDownIcon className={`h-4 w-4 transition-transform ${isAssetManagementOpen ? 'transform rotate-180' : ''}`}/>
+                                        </button>
+                    
+                                    {/* Dropdown panel */}
+                                    {isAssetManagementOpen && (
+                                        <div className="absolute right-0 mt-2 w-48 font-medium bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                                            <Link href="/IT_assets" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
+                                                <ComputerDesktopIcon className="h-5 w-5 mr-3 text-gray-700" />
+                                                Dashboard
+                                                
+                                            </Link>
+                                            <Link href="/IT_assets/management" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
+                                                <WrenchIcon className="h-5 w-5 mr-3 text-gray-700" />
+                                                Management
+                                            </Link>
+                                            <Link href="/IT_assets/asset_type" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
+                                                <CpuChipIcon className="h-5 w-5 mr-3 text-gray-700" />
+                                                Asset Types
+                                            </Link>
+                                        </div>
+                                    )}
+                                    </div>
+                                </div>
+                            )
+                        }
                     </nav>
                 </div>
                 <div className="flex items-center space-x-4">
                     <div className="relative" ref={dropdownSettingsRef}>
-                    <button
-                        onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                        className="flex cursor-pointer items-center space-x-2 hover:text-[#FFA400] focus:outline-none"
-                    >
-                        <span className="font-medium hidden sm:inline">{admin?.admin_id}</span>
-                        <ChevronDownIcon 
-                        className={`h-4 w-4 transition-transform ${isSettingsOpen ? 'transform rotate-180' : ''}`}
-                        />
-                    </button>
+                        <button onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                            className="flex cursor-pointer items-center space-x-2 hover:text-[#FFA400] focus:outline-none">
+                            <UserCircleIcon className="h-8 w-8 text-white"/>
+                            <div className="flex flex-col items-start">
+                                <span className="font-medium hidden sm:inline">{admin?.admin_id}</span>
+                                <span className='text-sm capitalize'>{admin?.role}</span>
+                            </div>
+                            <ChevronDownIcon className={`h-4 w-4 transition-transform ${isSettingsOpen ? 'transform rotate-180' : ''}`}/>
+                        </button>
     
-                    {/* Dropdown panel */}
-                    {isSettingsOpen && (
-                        <div className="absolute right-0 mt-2 w-48 font-medium bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
-                            <Link href="/settings" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
-                                <Cog6ToothIcon className="h-5 w-5 mr-3 text-gray-700" />
-                                Settings
-                            </Link>
-                            <span className='flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50 cursor-pointer' onClick={onLogout}>
-                                <ArrowLeftOnRectangleIcon className="h-5 w-5 mr-3 text-gray-700" />
-                                Logout
-                            </span>
-                        </div>
-                    )}
+                        {/* Dropdown panel */}
+                        {isSettingsOpen && (
+                            <div className="absolute right-0 mt-2 w-48 font-medium bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                                <Link href="/settings" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
+                                    <Cog6ToothIcon className="h-5 w-5 mr-3 text-gray-700" />
+                                    Settings
+                                </Link>
+                                <span className='flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50 cursor-pointer' onClick={onLogout}>
+                                    <ArrowLeftOnRectangleIcon className="h-5 w-5 mr-3 text-gray-700" />
+                                    Logout
+                                </span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
-            </header>
+        </header>
     )
 
 }

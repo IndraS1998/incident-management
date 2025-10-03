@@ -1,4 +1,5 @@
 import React from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
 interface PaginationProps {
   currentPage: number;
@@ -36,7 +37,7 @@ const Pagination: React.FC<PaginationProps> = ({
                     : "bg-white border-gray-300 text-[#2A2A72] hover:bg-[#FFA400] hover:text-white cursor-pointer"
                 }`}
             >
-                Prev
+                <ChevronLeftIcon className="h-5 w-5" />
             </button>
 
             {/* Page Numbers */}
@@ -65,7 +66,7 @@ const Pagination: React.FC<PaginationProps> = ({
                     : "bg-white border-gray-300 text-[#2A2A72] hover:bg-[#FFA400] hover:text-white cursor-pointer"
                 }`}
             >
-                Next
+                <ChevronRightIcon className="h-5 w-5" />
             </button>
         </div>
     );

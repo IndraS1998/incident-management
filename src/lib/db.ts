@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { AIResolutionProposal } from './models';
+import { Asset,AssetMaintenance,AssetMovement,AssetStateHistory,AssetType } from './models';
 
 export async function initializeDatabase(): Promise<{ success: boolean; message: string }> {
   const uri = process.env.MONGODB_URI;
@@ -16,15 +16,11 @@ export async function initializeDatabase(): Promise<{ success: boolean; message:
 
     // Initialize all models and indexes
     await Promise.all([
-      //Admin.init(),
-      //Department.init(),
-      //Building.init(),
-      //Floor.init(),
-      //Room.init(),
-      //Incident.init(),
-      //IncidentResolution.init(),
-      //AdminDepartment.init()
-      AIResolutionProposal.init()
+      AssetType.init(),
+      Asset.init(),
+      AssetMovement.init(),
+      AssetStateHistory.init(),
+      AssetMaintenance.init()
     ]);
 
     // Create any additional indexes not defined in schemas
