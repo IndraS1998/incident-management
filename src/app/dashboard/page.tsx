@@ -124,13 +124,13 @@ const Analytics: NextPage = () => {
     
 
     return (
-        <div className="min-h-screen bg-[#EAF6FF]">
+        <div className="min-h-screen bg-[#F6F6F8]">
             <Navbar />
             <main className="container mx-auto p-4">
                 <h1 className="text-2xl font-bold text-[#232528] mb-6">Analytics Dashboard</h1>
                 {/* Summary Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div className="bg-white p-4 rounded-lg shadow border border-[#EAF6FF]">
+                    <div className="bg-white p-4 rounded-lg shadow border border-[#F6F6F8]">
                         <h3 className="text-sm font-medium text-[#232528] mb-1">Total Incidents</h3>
                         {isMetricsLoading?(
                             <>
@@ -147,7 +147,7 @@ const Analytics: NextPage = () => {
                             </>
                         )}
                     </div>
-                    <div className="bg-white p-4 rounded-lg shadow border border-[#EAF6FF]">
+                    <div className="bg-white p-4 rounded-lg shadow border border-[#F6F6F8]">
                         <h3 className="text-sm font-medium text-[#232528] mb-1">Avgerage Resolution</h3>
                         {isMetricsLoading?(
                             <>
@@ -164,7 +164,7 @@ const Analytics: NextPage = () => {
                             </>
                         )}
                     </div>
-                    <div className="bg-white p-4 rounded-lg shadow border border-[#EAF6FF]">
+                    <div className="bg-white p-4 rounded-lg shadow border border-[#F6F6F8]">
                         <h3 className="text-sm font-medium text-[#232528] mb-1">Most Common Type</h3>
                         {isMetricsLoading?(
                             <>
@@ -178,7 +178,7 @@ const Analytics: NextPage = () => {
                             </>
                         )}
                     </div>
-                    <div className="bg-white p-4 rounded-lg shadow border border-[#EAF6FF]">
+                    <div className="bg-white p-4 rounded-lg shadow border border-[#F6F6F8]">
                         <h3 className="text-sm font-medium text-[#232528] mb-1">High Urgency</h3>
                         {isMetricsLoading?(
                             <>
@@ -197,13 +197,13 @@ const Analytics: NextPage = () => {
                 </div>
 
                 {/* Incident Volume Over Time */}
-                <div className="bg-white p-6 rounded-lg shadow border border-[#EAF6FF] mb-8">
+                <div className="bg-white p-6 rounded-lg shadow border border-[#F6F6F8] mb-8">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-lg font-semibold text-[#232528]">Incident Volume Over Time</h2>
                         <form>
                             <select
                                 {...register("period")}
-                                className="p-2 text-sm border border-[#EAF6FF] rounded cursor-pointer"
+                                className="p-2 text-sm border border-[#F6F6F8] rounded cursor-pointer"
                             >
                                 <option value="7d">Last 7 Days</option>
                                 <option value="30d">Last 30 Days</option>
@@ -212,7 +212,7 @@ const Analytics: NextPage = () => {
                             </select>
                         </form>
                     </div>
-                    <div className="h-80 bg-[#EAF6FF] bg-opacity-30 rounded flex items-center justify-center">
+                    <div className="h-80 bg-[#F6F6F8] bg-opacity-30 rounded flex items-center justify-center">
                         {
                             isIncidentVolumeLoading?<p className="text-gray-400">[Line Chart: Incident trends over selected period]</p>:
                             (
@@ -240,9 +240,9 @@ const Analytics: NextPage = () => {
                 {/* Metrics Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Average Resolution Time */}
-                    <div className="bg-white p-6 rounded-lg shadow border border-[#EAF6FF]">
+                    <div className="bg-white p-6 rounded-lg shadow border border-[#F6F6F8]">
                         <h2 className="text-lg font-semibold text-[#232528] mb-4">Average Resolution Time</h2>
-                        <div className="h-64 bg-[#EAF6FF] bg-opacity-30 rounded flex items-center justify-center mb-4">
+                        <div className="h-64 bg-[#F6F6F8] bg-opacity-30 rounded flex items-center justify-center mb-4">
                             {isIncidentVolumeLoading?
                             <p className="text-gray-400">[Bar Chart: Resolution time by incident type]</p>:(
                                 <ResponsiveContainer width="100%" height="100%">
@@ -279,9 +279,9 @@ const Analytics: NextPage = () => {
                     </div>
 
                     {/* Incident Type Distribution */}
-                    <div className="bg-white p-6 rounded-lg shadow border border-[#EAF6FF]">
+                    <div className="bg-white p-6 rounded-lg shadow border border-[#F6F6F8]">
                         <h2 className="text-lg font-semibold text-[#232528] mb-4">Incident Type Distribution</h2>
-                        <div className="h-64 bg-[#EAF6FF] bg-opacity-30 rounded flex items-center justify-center mb-4">
+                        <div className="h-64 bg-[#F6F6F8] bg-opacity-30 rounded flex items-center justify-center mb-4">
                             {isIncidentVolumeLoading?<p className="text-gray-400">[Pie Chart: Breakdown by incident type]</p>:
                             (
                                 <ResponsiveContainer width="100%" height={300}>
@@ -321,9 +321,9 @@ const Analytics: NextPage = () => {
                     </div>
 
                     {/* Urgency Level Distribution */}
-                    <div className="bg-white p-6 rounded-lg shadow border border-[#EAF6FF] lg:col-span-2">
+                    <div className="bg-white p-6 rounded-lg shadow border border-[#F6F6F8] lg:col-span-2">
                         <h2 className="text-lg font-semibold text-[#232528] mb-4">Urgency Level Distribution</h2>
-                        <div className="h-64 bg-[#EAF6FF] bg-opacity-30 rounded flex items-center justify-center mb-4">
+                        <div className="h-64 bg-[#F6F6F8] bg-opacity-30 rounded flex items-center justify-center mb-4">
                             {
                                 isIncidentVolumeLoading?<p className="text-gray-400">[Stacked Bar Chart: Urgency distribution over time]</p>:
                                 (

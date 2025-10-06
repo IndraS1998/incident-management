@@ -94,7 +94,7 @@ export default function AdministratorsManagement(){
 
     return(
         <>
-            <div className="min-h-screen bg-[#EAF6FF]">
+            <div className="min-h-screen bg-[#F6F6F8]">
                 <Navbar/>
                 {loading && (
                     <PageLoader/>
@@ -126,12 +126,12 @@ export default function AdministratorsManagement(){
                             setLoading(false);
                         }
                     })} 
-                    className="bg-white p-4 rounded-lg shadow-md mb-6 border border-[#EAF6FF]">
+                    className="bg-white p-4 rounded-lg shadow-md mb-6 border border-[#F6F6F8]">
                         <h2 className="text-lg font-semibold text-[#232528] mb-4">Create Administrator</h2>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-[#232528] mb-1">Full Name</label>
-                                    <input type="text" className="w-full p-2 border border-[#EAF6FF] focus:ring-[#FFA400] focus:ring-2 focus:border-transparent rounded focus:outline-none"
+                                    <input type="text" className="w-full p-2 border border-[#F6F6F8] focus:ring-[#FFA400] focus:ring-2 focus:border-transparent rounded focus:outline-none"
                                         placeholder="Full Name" {...register("name", { required: true })}
                                     />
                             </div>
@@ -140,7 +140,7 @@ export default function AdministratorsManagement(){
                                 <label className="block text-sm font-medium text-[#232528] mb-1">Phone</label>
                                 <input
                                     type="text"
-                                    className="w-full p-2 border border-[#EAF6FF] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
+                                    className="w-full p-2 border border-[#F6F6F8] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
                                     placeholder="Phone contact" {...register("phone", { required: true })}
                                 />
                             </div>
@@ -149,14 +149,14 @@ export default function AdministratorsManagement(){
                                 <label className="block text-sm font-medium text-[#232528] mb-1">Email</label>
                                 <input
                                     type="email"
-                                    className="w-full p-2 border border-[#EAF6FF] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
+                                    className="w-full p-2 border border-[#F6F6F8] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
                                     placeholder="email" {...register("email", { required: true })}
                                 />
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium text-[#232528] mb-1">Role</label>
-                                <select className="w-full p-2 border border-[#EAF6FF] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none" 
+                                <select className="w-full p-2 border border-[#F6F6F8] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none" 
                                 {...register("role", { required: true })}>
                                     {roles.map(role =>(
                                         <option key={role} value={role}>{role}</option>
@@ -166,7 +166,7 @@ export default function AdministratorsManagement(){
 
                             <div>
                                 <label className="block text-sm font-medium text-[#232528] mb-1">Status</label>
-                                <select className="w-full p-2 border border-[#EAF6FF] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none" 
+                                <select className="w-full p-2 border border-[#F6F6F8] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none" 
                                 {...register("status", { required: true })}>
                                     {statuses.map(s =>(
                                         <option key={s} value={s}>{s}</option>
@@ -207,23 +207,23 @@ export default function AdministratorsManagement(){
                             </button>
                         </div>
                     </form>
-                    <div className="bg-white rounded-lg shadow overflow-hidden border border-[#EAF6FF]">
+                    <div className="bg-white rounded-lg shadow overflow-hidden border border-[#F6F6F8]">
                         <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-[#EAF6FF]">
+                            <table className="min-w-full divide-y divide-[#F6F6F8]">
                                 <thead className="bg-[#2A2A72] bg-opacity-50">
                                     <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">User Name</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Full Name</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Email</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Contact</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Role</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-[#EAF6FF] uppercase tracking-wider">Actions</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-[#F6F6F8] uppercase tracking-wider">User Name</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-[#F6F6F8] uppercase tracking-wider">Full Name</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-[#F6F6F8] uppercase tracking-wider">Email</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-[#F6F6F8] uppercase tracking-wider">Contact</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-[#F6F6F8] uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-[#F6F6F8] uppercase tracking-wider">Role</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-[#F6F6F8] uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="bg-white divide-y divide-[#EAF6FF]">
+                                <tbody className="bg-white divide-y divide-[#F6F6F8]">
                                     {administrators.slice(((page - 1) * 5),(page * 5)).map((admin) => (
-                                    <tr key={admin.admin_id} className="hover:bg-[#EAF6FF] hover:bg-opacity-30">
+                                    <tr key={admin.admin_id} className="hover:bg-[#F6F6F8] hover:bg-opacity-30">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#232528]">
                                             {admin.admin_id}
                                         </td>
@@ -240,7 +240,7 @@ export default function AdministratorsManagement(){
                                             {editingAdmin === admin.admin_id ? (
                                                 <select
                                                 {...register("status")}
-                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm p-1 border border-[#EAF6FF] font-medium ${
+                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm p-1 border border-[#F6F6F8] font-medium ${
                                                     watch("status") === AdminStatus.ACTIVE 
                                                     ? 'bg-green-100 text-green-800' 
                                                     : 'bg-red-100 text-red-800'
@@ -264,7 +264,7 @@ export default function AdministratorsManagement(){
                                         {editingAdmin === admin.admin_id ? (
                                             <select
                                             {...register("role")}
-                                            className="p-1 text-sm border border-[#EAF6FF] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
+                                            className="p-1 text-sm border border-[#F6F6F8] rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none"
                                             >
                                             {roles.map(role => (
                                                 <option key={role} value={role}>{role}</option>

@@ -1,13 +1,11 @@
 import mongoose from 'mongoose';
-import { Asset,AssetMaintenance,AssetMovement,AssetStateHistory,AssetType } from './models';
+import { Asset } from './models';
 
 export async function initializeDatabase(): Promise<{ success: boolean; message: string }> {
   const uri = process.env.MONGODB_URI;
-  
   if (!uri) {
     throw new Error('Please add your Mongo URI to .env.local');
   }
-
   try {
     // Connect to database if not already connected
     if (mongoose.connection.readyState === 0) {
@@ -16,11 +14,7 @@ export async function initializeDatabase(): Promise<{ success: boolean; message:
 
     // Initialize all models and indexes
     await Promise.all([
-      AssetType.init(),
-      Asset.init(),
-      AssetMovement.init(),
-      AssetStateHistory.init(),
-      AssetMaintenance.init()
+      Asset.init()
     ]);
 
     // Create any additional indexes not defined in schemas

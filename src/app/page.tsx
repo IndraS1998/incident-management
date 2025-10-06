@@ -1,9 +1,11 @@
-'use client';
+'use client'
+
 import { useState,useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { alertService } from '@/lib/alert.service';
+import Image from 'next/image';
 
-export default function AuthPage() {
+export default function AdminLoginPage() {
   const [formData, setFormData] = useState({
     admin_id: '',
     password: ''
@@ -55,97 +57,58 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#EAF6FF] p-4">
-      <form onSubmit={handleSubmit} className="w-full max-w-md bg-[#EAF6FF] rounded-lg shadow-lg overflow-hidden">
-        <div className="p-6 text-center">
-          <h2 className="text-2xl font-bold text-[#14213d]">
-            Admin Login
-          </h2>
-          <p className="text-[#8d99ae] mt-2">
-            Access your incident management dashboard
-          </p>
+    <div className="flex min-h-screen items-center justify-center bg-[#F6F6F8] px-4">
+      <div className="w-full max-w-xl p-8 text-center">
+        {/* Logo or Icon */}
+        <div className="flex justify-center">
+          <div className="w-36 h-36 flex items-center justify-center">
+            <Image src="/LogoDark.svg" alt='IRIS' width={180} height={180} priority className="text-2xl font-bold"/>
+          </div>
         </div>
-        
-        <div className="px-6 pb-6 space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="username" className="block text-sm font-medium text-[#14213d]">
-              Login Name
-            </label>
+
+        {/* Header */}
+        <h1 className="text-2xl font-semibold text-gray-900 mb-1">Admin Login</h1>
+        <p className="text-gray-500 mb-8">Welcome back to the incident Reporting and Information System</p>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-4 text-left">
+          <div>
             <input
-              id="username"
               type="text"
-              placeholder="aadmin"
+              name="identifier"
+              placeholder="Username or Email"
               onChange={(e) => setFormData({...formData, admin_id: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFA400]"
+              required
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1C1C7D]"
             />
           </div>
-          
-          <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-medium text-[#14213d]">
-              Password
-            </label>
+          <div>
             <input
-              id="password"
               type="password"
-              placeholder="••••••••"
+              name="password"
+              placeholder="Password"
               onChange={(e) => setFormData({...formData, password: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFA400]"
+              required
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#2A2A72]"
             />
           </div>
-          
-          <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-2">
-                <input 
-                  type="checkbox" 
-                  id="remember" 
-                  className="rounded border-gray-300 text-[#FFA400] focus:ring-[#FFA400]" 
-                />
-                <label htmlFor="remember" className="text-sm text-[#8d99ae]">
-                  Remember me
-                </label>
-              </div>
-              <button className="text-sm text-[#FFA400] hover:underline cursor-pointer">
-                Forgot password?
-              </button>
-            </div>
-        </div>
-        
-        <div className="px-6 pb-6 space-y-4">
+          <div className="text-right">
+            <a
+              href="#"
+              className="text-sm text-[#2A2A72] hover:underline"
+            >
+              Forgot your password?
+            </a>
+          </div>
           <button
+            type="submit"
             disabled={loading}
-            className={`cursor-pointer w-full py-2 px-4 bg-[#FFA400] hover:bg-[#e69500] text-white font-medium rounded-md transition duration-200 ${
-              loading ? 'pointer-events-none' : ''
-            }`}
+            className="w-full bg-[#2A2A72] text-white py-2 rounded-md font-medium hover:bg-[#2A2A72] transition-colors focus:ring-2 focus:ring-[#2A2A72] focus:outline-none"
           >
-            {loading ? (
-              <div className="flex items-center justify-center">
-                <svg
-                  className="animate-spin h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-              </div>
-            ) : (
-              'Sign In'
-            )}
+            {loading ? 'Logging in...' : 'Log In'}
           </button>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
-  );
+  )
 }

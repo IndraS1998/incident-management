@@ -19,7 +19,6 @@ function sortIncidentBySeverity(incidents:Incident[]): Incident[]{
     [IncidentSeverity.MEDIUM]: 2,
     [IncidentSeverity.LOW] : 1,
   }
-
   return [...incidents].sort((a,b) => {return severityMagnitude[b.severity] - severityMagnitude[a.severity]})
 }
 
@@ -31,8 +30,6 @@ export default function IncidentManagement() {
   const [refreshCount,setRefreshCount] = useState<number>(0);
   const [page,setPage] = useState<number>(1)
   const [incidentPage,setIncidentPage] = useState<number>(1)
-
-
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [incidentDetail,setIncidentDetail] = useState<Incident | null>(null);
 
@@ -59,17 +56,15 @@ export default function IncidentManagement() {
   }
   
   useEffect(()=>{
-      const adminData = localStorage.getItem('admin_user');
-      const connectedAdmin : IAdmin = adminData ? JSON.parse(adminData) : null;
-      fetchIncidents(connectedAdmin.role,connectedAdmin._id)
-      fetchPendingIncidents(connectedAdmin.role,connectedAdmin._id)
+    const adminData = localStorage.getItem('admin_user');
+    const connectedAdmin : IAdmin = adminData ? JSON.parse(adminData) : null;
+    fetchIncidents(connectedAdmin.role,connectedAdmin._id)
+    fetchPendingIncidents(connectedAdmin.role,connectedAdmin._id)
   },[refreshCount])
-
-  
 
   return (
     <>
-      <div className="min-h-screen bg-[#EAF6FF]">
+      <div className="min-h-screen bg-[#F6F6F8]">
         <Navbar />
         {isLoading && (
             <PageLoader />
@@ -83,7 +78,7 @@ export default function IncidentManagement() {
           <div className="flex flex-col md:flex-row gap-6 h-full">
             {/* Recent Incidents Panel (Left) */}
             <div className="w-full md:flex-1 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer">
-              <div className="p-5 border-b border-gray-100 bg-[#EAF6FF]">
+              <div className="p-5 border-b border-gray-100 bg-[#F6F6F8]">
                 <div className="flex justify-between items-center">
                   <h2 className="text-lg font-semibold text-gray-900">Recent Incidents</h2>
                   <span className="text-xs font-medium px-2 py-1 bg-red-100 text-red-600 rounded-full">
@@ -146,16 +141,16 @@ export default function IncidentManagement() {
             </div>
 
             {/* Incidents Table (Right) - Keeping your existing table styling */}
-            <div className="w-full md:flex-[2] bg-white rounded-lg shadow overflow-hidden border border-[#EAF6FF]">
-              <div className="bg-white rounded-lg shadow-sm border border-[#EAF6FF] overflow-hidden">
-                <div className="bg-[#2A2A72] bg-opacity-50 px-6 py-3 border-b border-[#EAF6FF]">
-                    <h2 className="text-lg font-semibold text-[#EAF6FF]">
+            <div className="w-full md:flex-[2] bg-white rounded-lg shadow overflow-hidden border border-[#F6F6F8]">
+              <div className="bg-white rounded-lg shadow-sm border border-[#F6F6F8] overflow-hidden">
+                <div className="bg-[#2A2A72] bg-opacity-50 px-6 py-3 border-b border-[#F6F6F8]">
+                    <h2 className="text-lg font-semibold text-[#F6F6F8]">
                         Pending Incidents
                     </h2>
                 </div>
                 <div className="overflow-x-auto rounded-none">
-                  <table className="min-w-full divide-y divide-[#EAF6FF] rounded-none">
-                    <thead className="bg-[#EAF6FF] bg-opacity-30">
+                  <table className="min-w-full divide-y divide-[#F6F6F8] rounded-none">
+                    <thead className="bg-[#F6F6F8] bg-opacity-30">
                       <tr className='rounded-none'>
                         <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Description</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Department</th>
@@ -165,12 +160,12 @@ export default function IncidentManagement() {
                         <th className="px-6 py-3 text-left text-xs font-medium text-[#2A2A72] uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
-                    {pendingIncidents.length === 0 && <tbody className="bg-white divide-y divide-[#EAF6FF]">
+                    {pendingIncidents.length === 0 && <tbody className="bg-white divide-y divide-[#F6F6F8]">
                         <tr><td className="px-6 py-4 whitespace-normal break-words text-sm font-medium text-[#232528]">No Incident</td></tr>
                       </tbody>}
-                    <tbody className="bg-white divide-y divide-[#EAF6FF]">
+                    <tbody className="bg-white divide-y divide-[#F6F6F8]">
                       {pendingIncidents.slice((page - 1) * 5, page * 5).map((incident) => (
-                        <tr key={incident._id} className="hover:bg-[#EAF6FF] hover:bg-opacity-30">
+                        <tr key={incident._id} className="hover:bg-[#F6F6F8] hover:bg-opacity-30">
                           <td className="px-6 py-4 whitespace-normal break-words text-sm font-medium text-[#232528]">
                             {incident.description}
                           </td>

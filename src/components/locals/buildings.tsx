@@ -133,7 +133,7 @@ function ModalContent({ onClose, refreshBuildings, mode = 'create', buildingData
                         <input
                             type="text"
                             className={`w-full p-2 border ${
-                            errors.building_name ? 'border-red-500' : 'border-[#EAF6FF]'
+                            errors.building_name ? 'border-red-500' : 'border-[#F6F6F8]'
                             } rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none`}
                             placeholder="e.g. Batiment A"
                             {...register('building_name', { 
@@ -152,7 +152,7 @@ function ModalContent({ onClose, refreshBuildings, mode = 'create', buildingData
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 border border-[#EAF6FF] cursor-pointer text-[#232528] rounded-md hover:bg-[#EAF6FF] transition-colors"
+                            className="px-4 py-2 border border-[#F6F6F8] cursor-pointer text-[#232528] rounded-md hover:bg-[#F6F6F8] transition-colors"
                         >
                             Cancel
                         </button>

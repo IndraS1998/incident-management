@@ -51,7 +51,7 @@ const Closure : React.FC<ClosureProps> = ({incident, setIncident,isLoading, setI
 
     return(
         <div className="fixed inset-0 backdrop-blur-lg flex items-center justify-center p-4 z-5">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl border border-[#EAF6FF] max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl border border-[#F6F6F8] max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-start mb-1">
                     <div className="mb-4">
                         <h2 className="text-2xl font-bold text-gray-900">

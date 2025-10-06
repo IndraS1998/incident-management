@@ -3,7 +3,8 @@ import { NextResponse } from 'next/server';
 
 export async function GET() {
   try {
-    await initializeDatabase();
+    const response = await initializeDatabase();
+    console.log(response);
     return NextResponse.json({ success: true, message: "Database successfully updated" });
   } catch (error) {
     console.log(error)

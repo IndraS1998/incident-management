@@ -8,6 +8,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { UserCircleIcon,Squares2X2Icon,WrenchIcon,ComputerDesktopIcon } from '@heroicons/react/24/solid';
 import { Transition } from "@headlessui/react";
+import Image from 'next/image';
 
 
 // Interfaces
@@ -115,7 +116,7 @@ export default function Navbar(){
     };
     
     return (
-         <header className="bg-[#2A2A72] text-white p-4 shadow-md">
+        <header className="bg-[#2A2A72] text-white p-4 shadow-md sticky top-0 z-40">
             <div className="container mx-auto flex justify-between items-center">
                 <div className="flex items-center space-x-8">
                     {/* Mobile view */}
@@ -223,7 +224,8 @@ export default function Navbar(){
                             </nav>
                         </div>
                     </Transition>
-                    <h1 className="text-2xl font-bold">IRIS</h1>
+
+                    <Image src="/Logo.svg" alt='IRIS' width={100} height={100} priority className="text-2xl font-bold"/>
 
                     {/* Desktop view */}
                     <nav className="hidden lg:flex items-center space-x-6">

@@ -13,7 +13,7 @@ export default function LocalsManagement() {
 
     return (
         <>
-            <div className='min-h-screen bg-[#EAF6FF]'>
+            <div className='min-h-screen bg-[#F6F6F8]'>
                 <Navbar />
                 <main className="container mx-auto p-4">
                     {/* Header with Toggle Navigation */}
@@ -27,7 +27,7 @@ export default function LocalsManagement() {
                                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
                                 activeTab === tab
                                     ? 'bg-[#2A2A72] text-white'
-                                    : 'bg-white text-[#232528] hover:bg-[#EAF6FF]'
+                                    : 'bg-white text-[#232528] hover:bg-[#F6F6F8]'
                                 }`}
                             >
                                 {tab.charAt(0).toUpperCase() + tab.slice(1)}

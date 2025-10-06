@@ -106,7 +106,7 @@ const Acknowledgement : React.FC<AcknowledgementProps> = ({incident, setIncident
 
     return(
         <div className="fixed inset-0 backdrop-blur-lg flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl border border-[#EAF6FF] overflow-hidden">
+            <div className="bg-white rounded-xl shadow-xl w-full max-w-3xl border border-[#F6F6F8] overflow-hidden">
                 {/* Header */}
                 <div className="flex justify-between items-start p-6 border-b">
                     <div>
@@ -127,7 +127,7 @@ const Acknowledgement : React.FC<AcknowledgementProps> = ({incident, setIncident
                                 'bg-blue-100 text-blue-800'}`}>
                                 {incident.severity}
                             </span>
-                        </div>
+                        </div> 
                     </div>
                     <button onClick={() => setIncident(null)} className="text-gray-400 hover:text-[#FFA400] transition-colors cursor-pointer">
                         ✕
@@ -172,7 +172,7 @@ const Acknowledgement : React.FC<AcknowledgementProps> = ({incident, setIncident
                     {/* Phase 1 Form */}
                     <form onSubmit={handleSubmit(async FD => onSubmit(FD))} className="space-y-6">
                         {/* AI decision */}
-                        {!aiSuggested && <div className="bg-[#EAF6FF] border border-[#CCE5FF] p-4 rounded-lg flex justify-between items-center">
+                        {!aiSuggested && <div className="bg-[#F6F6F8] border border-[#FFA400] p-4 rounded-lg flex justify-between items-center">
                             <p className="text-sm text-[#232528]">Let AI evaluate the incident and suggest a resolution strategy?</p>
                             <button type="button" onClick={getSuggestion} disabled={aiSuggestionLoading} className={`px-4 py-2 text-sm font-medium rounded-md transition 
                                 ${aiSuggestionLoading ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#FFA400] text-white hover:bg-[#e69500] cursor-pointer'}`}>

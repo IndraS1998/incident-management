@@ -108,9 +108,9 @@ export default function Rooms(){
                     + Add New Room
                 </button>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border border-[#EAF6FF] overflow-x-auto w-full">
+            <div className="bg-white rounded-lg shadow-sm border border-[#F6F6F8] overflow-x-auto w-full">
                 <table className="min-w-full border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-                    <thead className="bg-[#2A2A72] text-[#EAF6FF] text-sm uppercase">
+                    <thead className="bg-[#2A2A72] text-[#F6F6F8] text-sm uppercase">
                         <tr>
                         <th className="px-4 py-2 text-left">Room Number</th>
                         <th className="px-4 py-2 text-left">Department</th>
@@ -124,7 +124,7 @@ export default function Rooms(){
                                 <tr className="bg-[#009FFD]">
                                     <td
                                         colSpan={3}
-                                        className="px-4 py-2 text-left font-bold text-[#EAF6FF] text-base"
+                                        className="px-4 py-2 text-left font-bold text-[#F6F6F8] text-base"
                                     >
                                         {building.building_name}
                                     </td>
@@ -134,7 +134,7 @@ export default function Rooms(){
                                 {building.floors.map((floor) => (
                                     <React.Fragment key={floor.floor_number}>
                                         {/* Floor row */}
-                                        <tr className="bg-[#EAF6FF] border-t">
+                                        <tr className="bg-[#F6F6F8] border-t">
                                             <td colSpan={3} className="px-6 py-2 text-sm font-semibold text-[#2A2A72]">
                                                 Etage {floor.floor_number}
                                             </td>
@@ -295,7 +295,7 @@ function ModalContent({ onClose, refreshBuildings, mode = 'create', roomData = n
                         </label>
                         <select
                             className={`w-full p-2 border ${
-                                errors.building_name ? 'border-red-500' : 'border-[#EAF6FF]'
+                                errors.building_name ? 'border-red-500' : 'border-[#F6F6F8]'
                             } rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none`}
                             {...register('building_name', { required: 'Building Name is required' })}
                             onChange={e => {
@@ -317,7 +317,7 @@ function ModalContent({ onClose, refreshBuildings, mode = 'create', roomData = n
                             Floor Number *
                         </label>
                         <select className={`w-full p-2 border ${
-                                errors.building_name ? 'border-red-500' : 'border-[#EAF6FF]'
+                                errors.building_name ? 'border-red-500' : 'border-[#F6F6F8]'
                                 } rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none`}
                                 {...register('floor_number', { required: 'Floor number is required' })}
                             >
@@ -337,7 +337,7 @@ function ModalContent({ onClose, refreshBuildings, mode = 'create', roomData = n
                         <input
                             type="text"
                             className={`w-full p-2 border ${
-                            errors.building_name ? 'border-red-500' : 'border-[#EAF6FF]'
+                            errors.building_name ? 'border-red-500' : 'border-[#F6F6F8]'
                             } rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none`}
                             placeholder="e.g. 2"
                             {...register('room_number', {
@@ -355,7 +355,7 @@ function ModalContent({ onClose, refreshBuildings, mode = 'create', roomData = n
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 border border-[#EAF6FF] cursor-pointer text-[#232528] rounded-md hover:bg-[#EAF6FF] transition-colors"
+                            className="px-4 py-2 border border-[#F6F6F8] cursor-pointer text-[#232528] rounded-md hover:bg-[#F6F6F8] transition-colors"
                         >
                             Cancel
                         </button>

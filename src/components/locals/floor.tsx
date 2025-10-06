@@ -84,9 +84,9 @@ export default function Floors(){
                     + Add New Floor
                 </button>
             </div>
-            <div className="bg-white rounded-lg shadow-sm border border-[#EAF6FF] overflow-x-auto w-full">
+            <div className="bg-white rounded-lg shadow-sm border border-[#F6F6F8] overflow-x-auto w-full">
                 <table className="min-w-full border border-gray-200 rounded-lg shadow-sm">
-                    <thead className="bg-[#2A2A72] text-[#EAF6FF] bg-opacity-30 text-sm uppercase">
+                    <thead className="bg-[#2A2A72] text-[#F6F6F8] bg-opacity-30 text-sm uppercase">
                         <tr>
                             <th className="px-4 py-2 text-left">Floor ID</th>
                             <th className="px-4 py-2 text-left">Floor Number</th>
@@ -97,7 +97,7 @@ export default function Floors(){
                     {data.slice(((page - 1) * 5),(page * 5)).map((group) => (
                         <React.Fragment key={group._id}>
                             {/* Building header row */}
-                            <tr key={group._id} className="bg-[#EAF6FF] font-semibold">
+                            <tr key={group._id} className="bg-[#F6F6F8] font-semibold">
                                 <td colSpan={3} className="px-4 py-2 font-bold text-gray-900">
                                 {group._id}
                                 </td>
@@ -219,7 +219,7 @@ function ModalContent({ onClose, refreshBuildings, mode = 'create', floorData = 
                             Building Name *
                         </label>
                         <select className={`w-full p-2 border ${
-                                errors.building_name ? 'border-red-500' : 'border-[#EAF6FF]'
+                                errors.building_name ? 'border-red-500' : 'border-[#F6F6F8]'
                                 } rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none`}
                                 {...register('building_name', { required: 'Building Name is required' })}
                             >
@@ -239,7 +239,7 @@ function ModalContent({ onClose, refreshBuildings, mode = 'create', floorData = 
                         <input
                             type="number"
                             className={`w-full p-2 border ${
-                            errors.building_name ? 'border-red-500' : 'border-[#EAF6FF]'
+                            errors.building_name ? 'border-red-500' : 'border-[#F6F6F8]'
                             } rounded focus:ring-[#FFA400] focus:ring-2 focus:border-transparent focus:outline-none`}
                             placeholder="e.g. 2"
                             {...register('floor_number', {
@@ -257,7 +257,7 @@ function ModalContent({ onClose, refreshBuildings, mode = 'create', floorData = 
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 border border-[#EAF6FF] cursor-pointer text-[#232528] rounded-md hover:bg-[#EAF6FF] transition-colors"
+                            className="px-4 py-2 border border-[#F6F6F8] cursor-pointer text-[#232528] rounded-md hover:bg-[#F6F6F8] transition-colors"
                         >
                             Cancel
                         </button>

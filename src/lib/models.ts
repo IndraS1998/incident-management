@@ -40,7 +40,7 @@ enum ResolutionStrategyType {
 }
 
 // Enums
-enum AssetState {
+export enum AssetState {
   IN_STOCK = 'in_stock',
   IN_USE = 'in_use',
   RETIRED = 'retired',
@@ -130,6 +130,7 @@ interface IAdminDepartment extends Document {
 
 export interface IAssetType extends Document {
   name: string;
+  description: string;
 }
 
 export interface IAsset extends Document {
@@ -137,11 +138,12 @@ export interface IAsset extends Document {
   type_id: Types.ObjectId | IAssetType;
   model_number: string;
   state: AssetState;
-  date_in_production: Date;
+  date_in_production?: Date;
   lifespan: number; // in months or years
   maintenance_frequency: number; // e.g. in days
-  office_id: Types.ObjectId; // references Office
+  office_id?: Types.ObjectId; // references Office
   age?: number; // derived field
+  criticality?: 'low' | 'medium' | 'high'; // derived field based on type and usage
 }
 
 export interface IAssetMovement extends Document {
@@ -254,6 +256,7 @@ const AdminDepartmentSchema = new Schema<IAdminDepartment>({
 
 const AssetTypeSchema = new Schema<IAssetType>({
   name: { type: String, required: true, unique: true },
+  description: { type: String, required: true },
 });
 
 const AssetSchema = new Schema<IAsset>({
@@ -261,10 +264,11 @@ const AssetSchema = new Schema<IAsset>({
   type_id: { type: Schema.Types.ObjectId, ref: 'AssetType', required: true },
   model_number: { type: String, required: true },
   state: { type: String, enum: Object.values(AssetState), required: true },
-  date_in_production: { type: Date, required: true },
+  date_in_production: { type: Date},
   lifespan: { type: Number, required: true },
   maintenance_frequency: { type: Number, required: true },
-  office_id: { type: Schema.Types.ObjectId, ref: 'Office', required: true },
+  criticality: { type: String, enum: ['low', 'medium', 'high']},
+  office_id: { type: Schema.Types.ObjectId, ref: 'Room' },
 });
 
 // Derived virtual field: asset age

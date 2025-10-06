@@ -206,7 +206,7 @@ export default function DepartmentTable() {
 
     return (
         <>
-            <div className='bg-[#EAF6FF] min-h-screen'>
+            <div className='bg-[#F6F6F8] min-h-screen'>
                 {isModalOpen && (
                     <ModalContent onClose={() => setIsModalOpen(false)} refresh={fetchDepartments} />
                 )}
@@ -378,8 +378,8 @@ export default function DepartmentTable() {
                         New Department
                     </button>
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-[#EAF6FF]">
-                            <thead className='bg-[#2A2A72] bg-opacity-50 text-[#EAF6FF]'>
+                        <table className="min-w-full divide-y divide-[#F6F6F8]">
+                            <thead className='bg-[#2A2A72] bg-opacity-50 text-[#F6F6F8]'>
                                 <tr>
                                     <th className="py-3 px-4 text-left">Department</th>
                                     <th className="py-3 px-4 text-left">Contact</th>
@@ -685,7 +685,7 @@ function ModalContent({onClose,refresh}:{onClose : () => void;refresh:()=>void})
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 border border-[#EAF6FF] cursor-pointer text-[#232528] rounded-md hover:bg-[#EAF6FF] transition-colors"
+                            className="px-4 py-2 border border-[#F6F6F8] cursor-pointer text-[#232528] rounded-md hover:bg-[#F6F6F8] transition-colors"
                         >
                             Cancel
                         </button>
