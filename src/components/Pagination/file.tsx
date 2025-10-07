@@ -30,11 +30,11 @@ const Pagination: React.FC<PaginationProps> = ({
             <button
                 onClick={() => handleClick(currentPage - 1)}
                 disabled={currentPage === 1}
-                className={`px-3 py-1 rounded-md border text-sm transition-colors
+                className={`px-3 py-1 rounded-md text-sm transition-colors
                 ${
                     currentPage === 1
                     ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-white border-gray-300 text-[#2A2A72] hover:bg-[#FFA400] hover:text-white cursor-pointer"
+                    : "bg-white border-gray-300 text-[#2A2A72] hover:bg-[#F6F6F8] cursor-pointer"
                 }`}
             >
                 <ChevronLeftIcon className="h-5 w-5" />
@@ -48,7 +48,7 @@ const Pagination: React.FC<PaginationProps> = ({
                 className={`px-3 py-1 rounded-md border text-sm transition-colors ${
                     currentPage === page
                     ? "bg-[#2A2A72] text-white border-[#2A2A72]"
-                    : "bg-white border-gray-300 text-[#2A2A72] hover:bg-[#FFA400] hover:text-white cursor-pointer"
+                    : "bg-white border-gray-300 text-[#2A2A72] hover:bg-[#F6F6F8] cursor-pointer"
                 }`}
                 >
                 {page}
@@ -59,11 +59,11 @@ const Pagination: React.FC<PaginationProps> = ({
             <button
                 onClick={() => handleClick(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className={`px-3 py-1 rounded-md border text-sm transition-colors
+                className={`px-3 py-1 rounded-md text-sm transition-colors
                 ${
                     currentPage === totalPages
                     ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                    : "bg-white border-gray-300 text-[#2A2A72] hover:bg-[#FFA400] hover:text-white cursor-pointer"
+                    : "bg-white border-gray-300 text-[#2A2A72] hover:bg-[#F6F6F8] cursor-pointer"
                 }`}
             >
                 <ChevronRightIcon className="h-5 w-5" />

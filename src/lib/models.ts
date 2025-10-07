@@ -71,11 +71,11 @@ interface IDepartment extends Document {
   contact: string;
 }
 
-interface IBuilding extends Document {
+export interface IBuilding extends Document {
   building_name: string;
 }
 
-interface IFloor extends Document {
+export interface IFloor extends Document {
   floor_number: number;
   building_name: string;
 }

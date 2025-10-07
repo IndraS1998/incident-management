@@ -6,17 +6,37 @@ import { useForm } from "react-hook-form";
 import PageLoader from "@/components/loaders/pageLoaders";
 import { alertService } from "@/lib/alert.service";
 import { MagnifyingGlassIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { AssetState } from "@/lib/models";
 import { fetchData } from "@/lib/functions"; 
+import Pagination from "@/components/Pagination/file";
+import Link from 'next/link';
+
+enum AssetState {
+  IN_STOCK = 'in_stock',
+  IN_USE = 'in_use',
+  RETIRED = 'retired',
+  HAS_ISSUES = 'has_issues',
+  UNDER_MAINTENANCE = 'under_maintenance',
+}
+
+interface Location{
+  building:string;
+  department:string;
+  floor:number;
+  room_number:number;
+}
 
 interface Asset {
-  id: string;
-  name: string;
-  type: string;
-  serialNumber: string;
-  location: string;
+  _id: string;
+  asset_id: string;
+  asset_type: string;
+  criticality:string;
+  model_number: string;
+  lifespan:number;
+  location: Location | null;
+  state: AssetState;
   age: string;
-  maintenance: string;
+  maintenance_frequency: number;
+  date_in_production:string;
 }
 
 interface AssetType {
@@ -26,7 +46,6 @@ interface AssetType {
 }
 
 interface AssetCreationForm{
-  name: string;
   type: string;
   model_number: string;
   state: AssetState;
@@ -41,17 +60,25 @@ interface AssetCreationForm{
 export default function AssetManagement() {
   const [types,setTypes] = useState<AssetType[]>([]);
   const [loading,setLoading] = useState(true);
+  const [assets,setAssets] = useState<Asset[]>([]);
   const [isModalOpen,setIsModalOpen] = useState<boolean>(false);
   const { register, handleSubmit,setValue, watch, reset, formState: { errors } } = useForm<AssetCreationForm>();
   const state = watch('state');
+  const [page,setPage] = useState<number>(1)
 
   async function fetchAssetTypes(){
     const data = await fetchData('/api/assets/types',setLoading)
     setTypes(data)
   }
 
+  async function fetchAssets(){
+    const data = await fetchData('/api/assets/creation',setLoading)
+    setAssets(data)
+  }
+
   useEffect(() =>{
     fetchAssetTypes();
+    fetchAssets();
   },[])
 
   useEffect(() => {
@@ -64,96 +91,64 @@ export default function AssetManagement() {
     setIsModalOpen(false)
   }
 
-  const [assets, setAssets] = useState<Asset[]>([
-    {
-      id: '1',
-      name: 'Laptop - Engineering',
-      type: 'Laptop',
-      serialNumber: 'SN12345',
-      location: 'Office - Floor 3',
-      age: '1 year',
-      maintenance: 'Due soon'
-    },
-    {
-      id: '2',
-      name: 'Server - Database',
-      type: 'Server',
-      serialNumber: 'SV67890',
-      location: 'Data Center - Rack A',
-      age: '3 years',
-      maintenance: 'Overdue'
-    },
-    {
-      id: '3',
-      name: 'Desktop - Design',
-      type: 'Desktop',
-      serialNumber: 'DS24680',
-      location: 'Office - Floor 2',
-      age: '6 months',
-      maintenance: 'Up to date'
-    },
-    {
-      id: '4',
-      name: 'Network Switch',
-      type: 'Switch',
-      serialNumber: 'NS13579',
-      location: 'Network Room',
-      age: '2 years',
-      maintenance: 'Up to date'
-    },
-    {
-      id: '5',
-      name: 'Printer - Office',
-      type: 'Printer',
-      serialNumber: 'PR98765',
-      location: 'Office - Floor 1',
-      age: '4 years',
-      maintenance: 'Overdue'
+  function getAge(dateString: string): number {
+    const now = new Date();
+    const date = new Date(dateString);
+    let age = now.getFullYear() - date.getFullYear();
+    const monthDiff = now.getMonth() - date.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < date.getDate())) {
+      age--;
     }
-  ]);
+    return age;
+  }
 
+  function getLifeLeft(dateString: string, lifespan: number): string {
+    if(dateString){
+      const age = getAge(dateString);
+      if(lifespan - age < 0) return 'Expired'
+      return `${lifespan - age} years`;
+    }else{
+      return 'N/A'
+    } 
+  }
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [filters, setFilters] = useState({
     type: '',
     age: '',
+    status: '',
     maintenance: ''
   });
 
-  const [newAsset, setNewAsset] = useState({
-    name: '',
-    type: '',
-    serialNumber: '',
-    location: ''
-  });
-
   const filteredAssets = assets.filter(asset =>
-    asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    asset.serialNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    asset.location.toLowerCase().includes(searchTerm.toLowerCase())
+    asset.model_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    asset.location?.building.toLowerCase().includes(searchTerm.toLowerCase())
   ).filter(asset =>
-    (filters.type === '' || asset.type === filters.type) &&
+    (filters.type === '' || asset.asset_type === filters.type) &&
     (filters.age === '' || asset.age === filters.age) &&
-    (filters.maintenance === '' || asset.maintenance === filters.maintenance)
+    matchesMaintenanceRange(asset.maintenance_frequency, filters.maintenance) &&
+    (filters.status === '' || asset.state === filters.status)
   );
 
-  const handleCreateAsset = () => {
-    if (newAsset.name && newAsset.type && newAsset.serialNumber && newAsset.location) {
-      const asset: Asset = {
-        id: Date.now().toString(),
-        name: newAsset.name,
-        type: newAsset.type,
-        serialNumber: newAsset.serialNumber,
-        location: newAsset.location,
-        age: '0 days',
-        maintenance: 'Up to date'
-      };
-      setAssets([...assets, asset]);
-      setNewAsset({ name: '', type: '', serialNumber: '', location: '' });
+  function matchesMaintenanceRange(assetValue: number, filter: string): boolean {
+    if (!filter || filter === '') return true;
+
+    switch (filter) {
+      case '1-3':
+        return assetValue >= 1 && assetValue <= 3;
+      case '4-6':
+        return assetValue >= 4 && assetValue <= 6;
+      case '7-12':
+        return assetValue >= 7 && assetValue <= 12;
+      case '12+':
+        return assetValue > 12;
+      default:
+        return true;
     }
-  };
+  }
 
   const clearFilters = () => {
-    setFilters({ type: '', age: '', maintenance: '' });
+    setFilters({ type: '', age: '', maintenance: '' , status: ''});
     setSearchTerm('');
   };
 
@@ -169,12 +164,27 @@ export default function AssetManagement() {
     setIsModalOpen(false)
   }
 
-  const getMaintenanceColor = (status: string) => {
-    switch (status) {
-      case 'Overdue': return 'text-red-600 bg-red-50';
-      case 'Due soon': return 'text-yellow-600 bg-yellow-50';
-      case 'Up to date': return 'text-green-600 bg-green-50';
-      default: return 'text-gray-600 bg-gray-50';
+  const getLifeLeftColor = (lifeLeft:string) => {
+    if (lifeLeft === 'Expired') {
+      return 'text-red-600 bg-red-50';
+    } else if (lifeLeft === '1 years' || lifeLeft === '0 years') {
+      return 'text-yellow-600 bg-yellow-50';
+    } else if (lifeLeft === '2 years' || lifeLeft === '3 years') {
+      return 'text-green-600 bg-green-50';
+    } else {
+      return 'text-gray-600 bg-gray-50';
+    }
+  } 
+
+  const getMaintenanceColor = (status: number) => {
+    if (status < 3) {
+      return 'text-red-600 bg-red-50';
+    } else if (status < 6) {
+      return 'text-yellow-600 bg-yellow-50';
+    } else if (status < 12) {
+      return 'text-green-600 bg-green-50';
+    } else {
+      return 'text-gray-600 bg-gray-50';
     }
   };
 
@@ -183,7 +193,7 @@ export default function AssetManagement() {
       {loading && <PageLoader />}
       {isModalOpen && <ModalContent closeModal={closeModal} onConfirm={handleModalConfirm} />}
       <Navbar />
-      <div className="container mx-auto p-4 min-h-[74vh]">
+      <div className="container mx-auto p-4 min-h-[84vh]">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-[#232528] ">Asset Management</h1>
@@ -206,8 +216,8 @@ export default function AssetManagement() {
                 const errorData = await response.json()
                 throw new Error(errorData.error || 'Failed to create asset')
               }
-              //const result = await response.json()
               alertService.success('Asset created successfully')
+              await fetchAssets()
               reset()
             }catch(error){
               console.log(error)
@@ -215,7 +225,6 @@ export default function AssetManagement() {
             }finally{
               setLoading(false)
             }
-            console.log(data)
           })} className="lg:col-span-1 bg-white rounded-lg shadow-sm border border-[#F6F6F8] p-6">
             <h2 className="text-xl font-semibold text-gray-800 mb-6">Create New Asset</h2>
             <div className="space-y-4">
@@ -232,16 +241,6 @@ export default function AssetManagement() {
                   ))}
                 </select>
                 {errors.type && <p className="text-red-500 text-xs mt-1">{errors.type.message}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Asset Name
-                </label>
-                <input type="text" placeholder="e.g., Printer 1 SecSG"
-                  className="w-full px-3 py-2 border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFA400] focus:border-transparent"
-                  {...register('name',{required:true})}
-                />
-                {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -298,7 +297,7 @@ export default function AssetManagement() {
                 </select>
                 {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state.message}</p>}
               </div>
-              <button onClick={handleCreateAsset}
+              <button type="submit"
                   className="w-full cursor-pointer  bg-[#FFA400] text-white py-2 px-4 rounded-md hover:bg-[#FFA400]/90 focus:outline-none focus:ring-2 focus:ring-[#FFA400] focus:ring-offset-2 transition-colors">
                   Create Asset
               </button>
@@ -312,11 +311,11 @@ export default function AssetManagement() {
                   <div className="relative w-full sm:w-64">
                       <MagnifyingGlassIcon className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                       <input
-                      type="text"
-                      placeholder="Search assets..."
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFA400] focus:border-transparent"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
+                        type="text"
+                        placeholder="Search assets..."
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FFA400] focus:border-transparent"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
                       />
                   </div>
               </div>
@@ -334,36 +333,31 @@ export default function AssetManagement() {
                       value={filters.type}
                       onChange={(e) => setFilters({...filters, type: e.target.value})}
                       >
-                          <option value="">Type</option>
-                          <option value="Laptop">Laptop</option>
-                          <option value="Desktop">Desktop</option>
-                          <option value="Server">Server</option>
-                          <option value="Printer">Printer</option>
-                          <option value="Switch">Switch</option>
+                        <option value="">Type</option>
+                        {types.map(t =>(
+                          <option value={t.name} key={t._id}>{t.name}</option>
+                        ))}
                       </select>
 
                       <select
                       className="text-sm border border-gray-200 rounded px-3 py-1 focus:outline-none focus:ring-1 focus:ring-[#FFA400]"
-                      value={filters.age}
-                      onChange={(e) => setFilters({...filters, age: e.target.value})}
-                      >
-                          <option value="">Age</option>
-                          <option value="6 months">6 months</option>
-                          <option value="1 year">1 year</option>
-                          <option value="2 years">2 years</option>
-                          <option value="3 years">3 years</option>
-                          <option value="4 years">4 years</option>
+                      value={filters.status}
+                      onChange={(e) => setFilters({...filters, status: e.target.value})}>
+                        <option value="">Status</option>
+                        {[AssetState.IN_STOCK,AssetState.IN_USE,AssetState.RETIRED,AssetState.UNDER_MAINTENANCE].map(s =>(
+                          <option value={s} key={s}>{s}</option>
+                        ))}
                       </select>
 
                       <select
-                      className="text-sm border border-gray-200 rounded px-3 py-1 focus:outline-none focus:ring-1 focus:ring-[#FFA400]"
-                      value={filters.maintenance}
-                      onChange={(e) => setFilters({...filters, maintenance: e.target.value})}
+                        className="text-sm border border-gray-200 rounded px-3 py-1 focus:outline-none focus:ring-1 focus:ring-[#FFA400]"
+                        value={filters.maintenance}
+                        onChange={(e) => setFilters({...filters, maintenance: e.target.value})}
                       >
-                          <option value="">Maintenance</option>
-                          <option value="Up to date">Up to date</option>
-                          <option value="Due soon">Due soon</option>
-                          <option value="Overdue">Overdue</option>
+                        <option value="">Maintenance</option>
+                        {['1-3','4-6','7-12','12+'].map(r =>(
+                          <option value={r} key={r}>every {r} months</option>
+                        ))} 
                       </select>
 
                       <button onClick={clearFilters}
@@ -380,44 +374,60 @@ export default function AssetManagement() {
               <table className="w-full">
                   <thead>
                   <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Asset Name</th>
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Type</th>
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Serial No.</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Status</th>
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Location</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Age</th>
+                      <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Life left </th>
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Maintenance</th>
                       <th className="text-left py-3 px-4 text-sm font-medium text-gray-700">Actions</th>
                   </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                  {filteredAssets.map((asset) => (
-                      <tr key={asset.id} className="hover:bg-gray-50">
-                      <td className="py-3 px-4 text-sm text-gray-900">{asset.name}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{asset.type}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{asset.serialNumber}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{asset.location}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{asset.age}</td>
-                      <td className="py-3 px-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getMaintenanceColor(asset.maintenance)}`}>
-                          {asset.maintenance}
-                          </span>
+                  {filteredAssets.slice((page - 1) * 5, page * 5).map((asset) => (
+                      <tr key={asset.asset_id} className="hover:bg-gray-50">
+                      <td className="py-3 px-4 text-sm text-gray-600">{asset.asset_type}</td>
+                      <td className="py-3 px-4 text-sm text-gray-600">{asset.model_number}</td>
+                      <td className="py-3 px-4 text-sm text-gray-600">{asset.state}</td>
+                      <td className="py-3 px-4 text-sm text-gray-600">
+                        {!asset.location && 'N/A' }
+                        {asset.location && asset.location.building}
+                        {asset.location && `/ Floor ${asset.location.floor}`}
+                        {asset.location && `/ Office ${asset.location.room_number}`}
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-600">
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getLifeLeftColor(getLifeLeft(asset.date_in_production, asset.lifespan))}`}>
+                          {getLifeLeft(asset.date_in_production, asset.lifespan)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-sm text-gray-600">
+                        Every {asset.maintenance_frequency} months
                       </td>
                       <td className="py-3 px-4">
-                          <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                          💤
-                          </button>
+                          <div className="flex space-x-2">
+                            <Link
+                              href={`/IT_assets/management/${asset._id}`}
+                              className="text-blue-800 hover:text-[#232528] text-sm font-medium cursor-pointer"
+                            >
+                              View Details
+                            </Link>
+                            <button className="text-[#FFA400] hover:text-[#FFA400]/80 text-sm font-medium cursor-pointer">
+                              Delete
+                            </button>
+                          </div>
                       </td>
-                      </tr>
+                    </tr>
                   ))}
-                  </tbody>
+                </tbody>
               </table>
-              </div>
+              <Pagination currentPage={page} totalPages={Math.ceil(assets.length/5)} onPageChange={setPage}/>
+            </div>
 
-              {filteredAssets.length === 0 && (
-              <div className="text-center py-8 text-gray-500">
-                  No assets found matching your criteria.
-              </div>
-              )}
+            {filteredAssets.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+                No assets found matching your criteria.
+            </div>
+            )}
           </div>
         </div>
       </div>
