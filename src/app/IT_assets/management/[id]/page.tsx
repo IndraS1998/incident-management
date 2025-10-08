@@ -9,17 +9,16 @@ import {
   MapPinIcon, 
   WrenchScrewdriverIcon,
   ArrowLeftIcon,
-  ArrowDownTrayIcon
+  ArrowDownTrayIcon,
+  TrashIcon
 } from '@heroicons/react/24/outline'
 import Link from 'next/link';
 import { fetchData } from '@/lib/functions';
-
-interface Location {
-  building: string;
-  department: string;
-  floor: number;
-  room_number: number;
-}
+import MaintenanceModal from '@/components/asset/modals/maintenance';
+import MovementModal from '@/components/asset/modals/movement';
+import StateChangeModal from '@/components/asset/modals/stateChange';
+import { AssetDataType } from '@/components/asset/dataTypes';
+import { formatLocation } from '@/components/asset/functions';
 
 enum AssetState {
   IN_STOCK = 'in_stock',
@@ -27,20 +26,6 @@ enum AssetState {
   RETIRED = 'retired',
   HAS_ISSUES = 'has_issues',
   UNDER_MAINTENANCE = 'under_maintenance',
-}
-
-interface Asset {
-  _id: string;
-  asset_id: string;
-  asset_type: string;
-  criticality: string;
-  model_number: string;
-  lifespan: number;
-  location: Location | null;
-  state: AssetState;
-  age: string;
-  maintenance_frequency: number;
-  date_in_production: string;
 }
 
 const maintenanceHistory = [
@@ -82,8 +67,11 @@ const stateHistory = [
 
 export default function AssetDetailsClient() {
   const { id } = useParams();
-  const [asset, setAsset] = useState<Asset | null>(null);
+  const [asset, setAsset] = useState<AssetDataType | null>(null);
   const [loading, setLoading] = useState(false);
+  const [maintenanceModalOpen,setMaintenanceModalOpen] = useState(false);
+  const [movementModalOpen,setMovementModalOpen] = useState(false);
+  const [statechangeModalOpen,setStateChangeModalOpen] = useState(false)
   //const [maintenancePage, setMaintenancePage] = useState(1);
   //const [statePage, setStatePage] = useState(1);
 
@@ -95,12 +83,6 @@ export default function AssetDetailsClient() {
   useEffect(() => {
     fetchAssetDetails();
   }, [fetchAssetDetails])
-
-  // Format location string from location object
-  const formatLocation = (location: Location | null): string => {
-    if (!location) return 'Not assigned';
-    return `${location.department} / ${location.building} / ${location.floor}${getOrdinalSuffix(location.floor)} Floor / Room ${location.room_number}`;
-  };
 
   function getAge(dateString: string): number {
     const now = new Date();
@@ -122,17 +104,6 @@ export default function AssetDetailsClient() {
       return 'N/A'
     } 
   }
-
-  // Helper function for ordinal suffixes
-  const getOrdinalSuffix = (num: number): string => {
-    if (num % 100 >= 11 && num % 100 <= 13) return 'th';
-    switch (num % 10) {
-      case 1: return 'st';
-      case 2: return 'nd';
-      case 3: return 'rd';
-      default: return 'th';
-    }
-  };
 
   const getCriticalityColor = (status: string) => {
     if (status === 'high') {
@@ -176,46 +147,57 @@ export default function AssetDetailsClient() {
   return (
     <div className="bg-[#F6F6F8]">
         {loading && <PageLoader />}
+        {maintenanceModalOpen && <MaintenanceModal isModalOpen={maintenanceModalOpen} 
+          asset={asset} setIsModalOpen={setMaintenanceModalOpen} handleRefresh={() => {}}/>}
+        {movementModalOpen && <MovementModal isModalOpen={movementModalOpen} 
+          asset={asset} setIsModalOpen={setMovementModalOpen} handleRefresh={() => {}}/>}
+        {statechangeModalOpen && <StateChangeModal isModalOpen={statechangeModalOpen} 
+          asset={asset} setIsModalOpen={setStateChangeModalOpen} handleRefresh={() => {}}/>}
         <Navbar />
         <div className="container mx-auto p-4 min-h-[84vh]">
             {/* Header */}
             <div className="mb-4 mt-4">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex-1">
-                        <Link href='/IT_assets/management' className="inline-flex items-center text-[#232528] hover:text-[#232528]/80 text-sm font-medium cursor-pointer">
-                            <ArrowLeftIcon className="h-4 w-4 mr-2" />
-                            Back to Assets
-                        </Link>
-                        <h1 className="mt-2 text-2xl font-bold text-gray-900">Asset Details</h1>
-                        <p className="text-gray-600 mt-2">
-                            Comprehensive information for Asset {asset?.asset_id}.
-                        </p>
+                      <Link href='/IT_assets/management' className="inline-flex items-center text-[#232528] hover:text-[#232528]/80 text-sm font-medium cursor-pointer">
+                        <ArrowLeftIcon className="h-4 w-4 mr-2" />
+                        Back to Assets
+                      </Link>
+                      <h1 className="mt-2 text-2xl font-bold text-gray-900">Asset Details</h1>
+                      <p className="text-gray-600 mt-2">
+                        Comprehensive information for Asset {asset?.asset_id}.
+                      </p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                     {/* Change Asset State Button */}
-                    <button
-                        className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-[#2A2A72] bg-white hover:bg-gray-50 focus:outline-none"
+                    <button onClick={()=>{setMaintenanceModalOpen(true)}}
+                        className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-sm  text-sm font-medium text-[#2A2A72] bg-white hover:bg-gray-50 focus:outline-none"
                     >
-                        <CogIcon className="h-4 w-4 mr-2" />
-                        Change Asset State
+                      <WrenchScrewdriverIcon className="h-4 w-4 mr-2" />
+                      Perform Maintenance
                     </button>
 
                     {/* Perform Location Change Button */}
-                    <button
-                        className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-[#2A2A72] bg-white hover:bg-gray-50 focus:outline-none"
+                    <button onClick={()=>{setMovementModalOpen(true)}}
+                        className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium text-[#2A2A72] bg-white hover:bg-gray-50 focus:outline-none"
                     >
-                        <MapPinIcon className="h-4 w-4 mr-2" />
-                        Perform Location Change
+                      <MapPinIcon className="h-4 w-4 mr-2" />
+                      Perform Location Change
                     </button>
 
                     {/* Perform Maintenance Button */}
-                    <button
-                        className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-[#F6F6F8] bg-[#009FFD] hover:bg-[#009FFD]/80 focus:outline-none"
+                    <button onClick={() => {setStateChangeModalOpen(true)}}
+                        className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium text-[#F6F6F8] bg-[#009FFD] hover:bg-[#009FFD]/80 focus:outline-none"
                     >
-                        <WrenchScrewdriverIcon className="h-4 w-4 mr-2" />
-                        Perform Maintenance
+                      <CogIcon className="h-4 w-4 mr-2" />
+                      Change Asset State
                     </button>
-                    </div>
+                    <button
+                        className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-sm text-sm font-medium text-[#F6F6F8] bg-[#E63946] hover:bg-[#E63946]/80 focus:outline-none"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
             </div>
             {/* Asset Information Section */}

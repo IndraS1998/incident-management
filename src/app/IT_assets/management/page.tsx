@@ -512,7 +512,7 @@ function ModalContent({closeModal,onConfirm}: {closeModal: () => void,
     <div className="fixed inset-0 bg-white/30 bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-40">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
         {loading && (
-            <PageLoader />
+          <PageLoader />
         )}
         <div className="bg-[#2A2A72] text-white px-6 py-3 rounded-t-lg flex justify-between items-center">
           <h3 className="text-lg font-semibold">Select Equipment Location</h3>

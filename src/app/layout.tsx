@@ -17,6 +17,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Incident Reporting Admin",
   description: "Admin panel for reporting incidents",
+  icons: {
+    icon: '/LogoWithBackground', // Default favicon
+    shortcut: '/LogoWithBackground.svg',
+    apple: '/LogoWithBackground.svg', // Apple touch icon
+  },
 };
 
 export default function RootLayout({
