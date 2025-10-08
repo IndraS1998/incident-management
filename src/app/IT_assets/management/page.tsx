@@ -175,7 +175,7 @@ export default function AssetManagement() {
       return 'text-gray-600 bg-gray-50';
     }
   } 
-
+  /*
   const getMaintenanceColor = (status: number) => {
     if (status < 3) {
       return 'text-red-600 bg-red-50';
@@ -186,7 +186,7 @@ export default function AssetManagement() {
     } else {
       return 'text-gray-600 bg-gray-50';
     }
-  };
+  };*/
 
   return (
     <div className="bg-[#F6F6F8]">
@@ -292,7 +292,7 @@ export default function AssetManagement() {
                   {...register('state', { required: true })}>
                   <option value="">Select state</option>
                   {[{code:'in_stock',str:'In stock'},{code:'in_use',str:'In use'}].map(s =>(
-                    <option value={s.code} key={s.code}>{s.str}</option>
+                    <option value={s.code} key={s.code}>{s.str.split('_').join(' ')}</option>
                   ))}
                 </select>
                 {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state.message}</p>}
@@ -345,7 +345,7 @@ export default function AssetManagement() {
                       onChange={(e) => setFilters({...filters, status: e.target.value})}>
                         <option value="">Status</option>
                         {[AssetState.IN_STOCK,AssetState.IN_USE,AssetState.RETIRED,AssetState.UNDER_MAINTENANCE].map(s =>(
-                          <option value={s} key={s}>{s}</option>
+                          <option value={s} key={s}>{s.split('_').join(' ')}</option>
                         ))}
                       </select>
 
@@ -388,7 +388,7 @@ export default function AssetManagement() {
                       <tr key={asset.asset_id} className="hover:bg-gray-50">
                       <td className="py-3 px-4 text-sm text-gray-600">{asset.asset_type}</td>
                       <td className="py-3 px-4 text-sm text-gray-600">{asset.model_number}</td>
-                      <td className="py-3 px-4 text-sm text-gray-600">{asset.state}</td>
+                      <td className="py-3 px-4 text-sm text-gray-600 uppercase">{asset.state.split('_').join(' ')}</td>
                       <td className="py-3 px-4 text-sm text-gray-600">
                         {!asset.location && 'N/A' }
                         {asset.location && asset.location.building}

@@ -1,10 +1,10 @@
-import React from 'react'
+import React,{useState} from 'react'
 import { useForm } from "react-hook-form";
 import { alertService } from '@/lib/alert.service';
-import { fetchData } from '@/lib/functions';
-import { AssetModalProps, MaintenanceType,MaintenanceModalFormProps } from '../dataTypes';
+import { AssetModalProps, MaintenanceType,MaintenanceModalFormProps,AdminDT } from '../dataTypes';
 import Modal from '@/components/modalParent';
 import { InformationCircleIcon } from '@heroicons/react/24/outline';
+import PageLoader from '@/components/loaders/pageLoaders';
 
 const MaintenanceModal: React.FC<AssetModalProps> = ({asset,isModalOpen,setIsModalOpen,handleRefresh}) => {
     const { register, handleSubmit, reset, formState: { errors,isValid }} = useForm<MaintenanceModalFormProps>({
@@ -14,6 +14,7 @@ const MaintenanceModal: React.FC<AssetModalProps> = ({asset,isModalOpen,setIsMod
             next_due_date: addMonthsToDate(asset?.maintenance_frequency ?? 0),
         }
     });
+    const [loading,setLoading] = useState(false)
     
     return(
         <Modal
@@ -23,8 +24,33 @@ const MaintenanceModal: React.FC<AssetModalProps> = ({asset,isModalOpen,setIsMod
             subtitle="Manage the maintenance schedule for your asset"
             height='lg'
       >
+        {loading && <PageLoader />}
         <form onSubmit={handleSubmit(async (data) =>{
-            console.log(data)
+            setLoading(true)
+            const adminData = localStorage.getItem('admin_user');
+            const connectedAdmin : AdminDT = adminData ? JSON.parse(adminData) : null;
+            try{
+                const response = await fetch('/api/assets/update/maintenance',{
+                    method:'POST',
+                    headers:{
+                        'Content-Type':'application/json'
+                    },
+                    body: JSON.stringify({...data,performed_by:connectedAdmin._id,asset_id:asset?._id})
+                })
+                if(!response.ok){
+                    const errorData = await response.json()
+                    throw new Error(errorData.error || 'Failed to create asset')
+                }
+                alertService.success('Asset note submitted successfully')
+                await handleRefresh()
+                reset()
+            }catch(error){
+                console.log(error)
+                alertService.error('Unable to submit maintenance notes!')
+            }finally{
+                setLoading(false)
+                setIsModalOpen(false)
+            }
         })} className='px-2'>
             <div className='mb-4'>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Maintenance Type</label>

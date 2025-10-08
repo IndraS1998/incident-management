@@ -1,12 +1,15 @@
-import React from "react"
+import React,{useState} from "react"
 import { AssetModalProps } from "../dataTypes"
 import Modal from "@/components/modalParent"
 import { Grid2X2Plus } from "lucide-react"
-import { AssetState,StateChangeFormProps } from "../dataTypes"
+import { AssetState,StateChangeFormProps,AdminDT } from "../dataTypes"
 import { useForm } from "react-hook-form"
+import PageLoader from "@/components/loaders/pageLoaders"
+import { alertService } from "@/lib/alert.service"
 
 const StateChangeModal : React.FC<AssetModalProps> = ({asset,isModalOpen,setIsModalOpen,handleRefresh}) =>{
-    const { register, handleSubmit, formState: { errors, isValid } } = useForm<StateChangeFormProps>();
+    const { register,reset, handleSubmit, formState: { errors, isValid } } = useForm<StateChangeFormProps>();
+    const [loading,setLoading] = useState(false)
         
     return(
         <Modal isOpen={isModalOpen}
@@ -14,7 +17,34 @@ const StateChangeModal : React.FC<AssetModalProps> = ({asset,isModalOpen,setIsMo
             title="Asset Movements"
             subtitle="Manage the location and movement for your asset"
             height='lg'>
-                <form className='px-2'>
+                {loading && <PageLoader />}
+                <form className='px-2' onSubmit={handleSubmit(async (data) =>{
+                    setLoading(true)
+                    const adminData = localStorage.getItem('admin_user');
+                    const connectedAdmin : AdminDT = adminData ? JSON.parse(adminData) : null;
+                    try{
+                        const response = await fetch('/api/assets/update/stateMutation',{
+                            method:'PATCH',
+                            headers:{
+                                'Content-Type':'application/json'
+                            },
+                            body: JSON.stringify({...data,changed_by:connectedAdmin._id,asset_id:asset?._id})
+                        })
+                        if(!response.ok){
+                            const errorData = await response.json()
+                            throw new Error(errorData.error || 'Failed to create asset')
+                        }
+                        alertService.success('Asset state change performed successfully')
+                        await handleRefresh()
+                        reset()
+                    }catch(error){
+                        console.log(error)
+                        alertService.error('Unexpected error! Please try later')
+                    }finally{
+                        setLoading(false)
+                        setIsModalOpen(false)
+                    }
+                })}>
                     <div className="mb-2">
                         <label className="block text-sm font-medium text-[#232528] mb-1">Current State</label>
                         <div className='text-[#323d48] bg-[#323d48]/8 text-md font-medium mt-2 p-6 inline-flex items-center w-full'>

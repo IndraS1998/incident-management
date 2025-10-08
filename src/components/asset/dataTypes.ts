@@ -1,9 +1,19 @@
 interface AssetModalProps{
-    asset: AssetDataType | null;
-    isModalOpen: boolean;
-    setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-    handleRefresh : () => void;
+  asset: AssetDataType | null;
+  isModalOpen: boolean;
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  handleRefresh : () => void;
 }
+
+interface AdminDT {
+  _id:string;
+  admin_id: string; 
+  name: string;
+  email: string;
+  phone: string;
+  password_hash: string;
+}
+
 /**
  * @maintenance modal data types
  */
@@ -42,25 +52,25 @@ export enum MaintenanceType {
 }
 
 interface MaintenanceModalFormProps{
-    maintenance_type: MaintenanceType;
-    notes: string;
-    next_due_date: Date;
+  maintenance_type: MaintenanceType;
+  notes: string;
+  next_due_date: Date;
 }
 
 /**
  * @Asset Movement data
  */
 interface MovementModalFormProps{
-    department : string;
-    building: string;
-    floor: number;
-    room: string;
-    reason: string;
+  department : string;
+  building: string;
+  floor: number;
+  room: string;
+  reason: string;
 }
 
 interface StateChangeFormProps{
-    new_state: AssetState;
-    notes: string;
+  new_state: AssetState;
+  notes: string;
 }
 
-export type { AssetModalProps, MaintenanceModalFormProps, AssetDataType, LocationDataType, MovementModalFormProps,StateChangeFormProps }
+export type { AssetModalProps, MaintenanceModalFormProps, AssetDataType, LocationDataType, MovementModalFormProps,StateChangeFormProps, AdminDT }

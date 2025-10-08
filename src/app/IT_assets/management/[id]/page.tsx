@@ -148,11 +148,11 @@ export default function AssetDetailsClient() {
     <div className="bg-[#F6F6F8]">
         {loading && <PageLoader />}
         {maintenanceModalOpen && <MaintenanceModal isModalOpen={maintenanceModalOpen} 
-          asset={asset} setIsModalOpen={setMaintenanceModalOpen} handleRefresh={() => {}}/>}
+          asset={asset} setIsModalOpen={setMaintenanceModalOpen} handleRefresh={fetchAssetDetails}/>}
         {movementModalOpen && <MovementModal isModalOpen={movementModalOpen} 
-          asset={asset} setIsModalOpen={setMovementModalOpen} handleRefresh={() => {}}/>}
+          asset={asset} setIsModalOpen={setMovementModalOpen} handleRefresh={fetchAssetDetails}/>}
         {statechangeModalOpen && <StateChangeModal isModalOpen={statechangeModalOpen} 
-          asset={asset} setIsModalOpen={setStateChangeModalOpen} handleRefresh={() => {}}/>}
+          asset={asset} setIsModalOpen={setStateChangeModalOpen} handleRefresh={fetchAssetDetails}/>}
         <Navbar />
         <div className="container mx-auto p-4 min-h-[84vh]">
             {/* Header */}

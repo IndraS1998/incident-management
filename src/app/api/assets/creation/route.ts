@@ -3,7 +3,6 @@ import { connectDatabase } from '@/lib/connect'
 import { Asset, AssetState, AssetStateHistory } from '@/lib/models' // adjust import path
 import { Types } from 'mongoose'
 
-
 export async function GET() {
   try {
     await connectDatabase();

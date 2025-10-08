@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import PageLoader from '@/components/loaders/pageLoaders';
 import { alertService } from '@/lib/alert.service';
 import { fetchData } from '@/lib/functions';
-import { AssetModalProps, MovementModalFormProps } from '../dataTypes';
+import { AssetModalProps, MovementModalFormProps,AdminDT } from '../dataTypes';
 import Modal from '@/components/modalParent';
 import { MapPin } from 'lucide-react';
 import { formatLocation } from '../functions';
@@ -15,7 +15,7 @@ const MovementModal: React.FC<AssetModalProps> = ({asset,isModalOpen,setIsModalO
     const [floors,setFloors] = useState<{_id:string,floor_number:number}[]>([])
     const [rooms,setRooms] = useState<{_id:string,room_number:number}[]>([])
     
-    const { register, watch,setValue,handleSubmit, formState: { errors, isValid } } = useForm<MovementModalFormProps>();
+    const { register, watch, setValue, reset, handleSubmit, formState: { errors, isValid } } = useForm<MovementModalFormProps>();
     const selectedDepartment = watch('department');
     const selectedBuilding = watch('building');
     const selectedFloor = watch('floor');
@@ -79,7 +79,33 @@ const MovementModal: React.FC<AssetModalProps> = ({asset,isModalOpen,setIsModalO
             title="Asset Movements"
             subtitle="Manage the location and movement for your asset"
             height='lg'>
-            <form className='px-2'>
+            <form className='px-2' onSubmit={(handleSubmit(async (data)=>{
+                setLoading(true)
+                const adminData = localStorage.getItem('admin_user');
+                const connectedAdmin : AdminDT = adminData ? JSON.parse(adminData) : null;
+                try{
+                    const response = await fetch('/api/assets/update/mouvement',{
+                        method:'POST',
+                        headers:{
+                            'Content-Type':'application/json'
+                        },
+                        body: JSON.stringify({...data,to_office_id: data.room, moved_by:connectedAdmin._id,asset_id:asset?._id})
+                    })
+                    if(!response.ok){
+                        const errorData = await response.json()
+                        throw new Error(errorData.error || 'Failed to create asset')
+                    }
+                    alertService.success('Asset updated successfully')
+                    await handleRefresh()
+                    reset()
+                }catch(error){
+                    console.log(error)
+                    alertService.error('Unable to perform location change!')
+                }finally{
+                    setLoading(false)
+                    setIsModalOpen(false)
+                }
+            }))}>
                 {loading && (
                     <PageLoader />
                 )}
@@ -133,7 +159,7 @@ const MovementModal: React.FC<AssetModalProps> = ({asset,isModalOpen,setIsModalO
                         ))}
                     </select>
                     {errors.floor && <p className="text-red-500 text-xs mt-1">{errors.floor.message}</p>}
-                </div>new_state
+                </div>
                 <div className="mb-2">
                     <label className="block text-sm font-medium text-[#232528] mb-1">New Room *</label>
                     <select {...register('room', { required: 'Room is required'})}
