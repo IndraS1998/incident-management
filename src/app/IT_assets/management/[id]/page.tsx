@@ -88,7 +88,7 @@ export default function AssetDetailsClient() {
   //const [statePage, setStatePage] = useState(1);
 
   const fetchAssetDetails = useCallback(async () => {
-    const data = await fetchData(`/api/assets/${id}`, setLoading);
+    const data = await fetchData(`/api/assets?id=${id}`, setLoading);
     setAsset(data);
   }, [id, setLoading]);
 
