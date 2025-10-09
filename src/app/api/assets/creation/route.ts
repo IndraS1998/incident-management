@@ -69,7 +69,13 @@ export async function GET() {
           asset_type: '$assetTypeInfo.name',
           location: {
             $cond: {
-              if: { $eq: ['$state', 'in_use'] },
+              if: { 
+                $or:[
+                  {$eq: ['$state', 'in_use'] },
+                  {$eq: ['$state', 'under_maintenance'] },
+                  {$eq: ['$state', 'has_issues'] },
+                ]
+              },
               then: {
                 room_number: '$roomInfo.room_number',
                 floor: '$roomInfo.floor_number',

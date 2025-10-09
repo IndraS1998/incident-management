@@ -19,6 +19,8 @@ import MovementModal from '@/components/asset/modals/movement';
 import StateChangeModal from '@/components/asset/modals/stateChange';
 import { AssetDataType } from '@/components/asset/dataTypes';
 import { formatLocation } from '@/components/asset/functions';
+import { AdminDT } from '@/components/asset/dataTypes';
+import Pagination from '@/components/Pagination/file';
 
 enum AssetState {
   IN_STOCK = 'in_stock',
@@ -28,41 +30,26 @@ enum AssetState {
   UNDER_MAINTENANCE = 'under_maintenance',
 }
 
-const maintenanceHistory = [
-  {
-    date: '2023-05-15',
-    type: 'Preventive',
-    performedBy: 'Tech Support Team',
-    notes: 'Annual checkup and cleaning'
-  },
-  {
-    date: '2023-11-20',
-    type: 'Repair',
-    performedBy: 'Tech Support Team',
-    notes: 'Replaced faulty hard drive'
-  },
-  {
-    date: '2024-05-15',
-    type: 'Preventive',
-    performedBy: 'Tech Support Team',
-    notes: 'Annual checkup and cleaning'
-  }
-];
+interface MaintenaceHistoryItem{
+  asset_id: string,
+  maintenance_id: string,
+  maintenance_type: string,
+  next_due_date: string,
+  notes: string,
+  performed_at: string,
+  performed_by: AdminDT,
+}
 
-const stateHistory = [
-  {
-    date: '2022-05-15',
-    state: 'Active',
-    changedBy: 'System Admin',
-    reason: 'Asset deployed'
-  },
-  {
-    date: '2023-11-20',
-    state: 'Active',
-    changedBy: 'Tech Support Team',
-    reason: 'Asset repaired and reactivated'
-  }
-];
+interface StateHistoryItem {
+  _id: string,
+  asset_id: string,
+  changed_at: string,
+  changed_by: AdminDT,
+  history_id: string,
+  new_state: string,
+  notes: string,
+  previous_state: string,
+}
 
 
 export default function AssetDetailsClient() {
@@ -71,18 +58,36 @@ export default function AssetDetailsClient() {
   const [loading, setLoading] = useState(false);
   const [maintenanceModalOpen,setMaintenanceModalOpen] = useState(false);
   const [movementModalOpen,setMovementModalOpen] = useState(false);
-  const [statechangeModalOpen,setStateChangeModalOpen] = useState(false)
-  //const [maintenancePage, setMaintenancePage] = useState(1);
-  //const [statePage, setStatePage] = useState(1);
+  const [statechangeModalOpen,setStateChangeModalOpen] = useState(false);
+  const [maintenanceHistory,setMaintenanceHistory] = useState<MaintenaceHistoryItem[] | null>(null)
+  const [stateHistory,setStateHistory] = useState<StateHistoryItem[] | null>(null)
+  const [maintenancePage, setMaintenancePage] = useState(1);
+  const [statePage, setStatePage] = useState(1);
 
   const fetchAssetDetails = useCallback(async () => {
     const data = await fetchData(`/api/assets?id=${id}`, setLoading);
     setAsset(data);
   }, [id, setLoading]);
 
+  const fetchMaintenanceHistory = useCallback(async () =>{
+    const data = await fetchData(`/api/assets/update/maintenance?asset_id=${id}`,setLoading)
+    setMaintenanceHistory(data)
+  },[id])
+
+  const fetchStateMutationHistory = useCallback(async () =>{
+    const data = await fetchData(`/api/assets/update/stateMutation?asset_id=${id}`,setLoading)
+    setStateHistory(data)
+  },[id])
+
+  const init = useCallback(async () => {
+    await fetchAssetDetails();
+    await fetchMaintenanceHistory();
+    await fetchStateMutationHistory();
+  }, [fetchAssetDetails, fetchMaintenanceHistory, fetchStateMutationHistory]);
+
   useEffect(() => {
-    fetchAssetDetails();
-  }, [fetchAssetDetails])
+    init();
+  }, [init]);
 
   function getAge(dateString: string): number {
     const now = new Date();
@@ -148,11 +153,11 @@ export default function AssetDetailsClient() {
     <div className="bg-[#F6F6F8]">
         {loading && <PageLoader />}
         {maintenanceModalOpen && <MaintenanceModal isModalOpen={maintenanceModalOpen} 
-          asset={asset} setIsModalOpen={setMaintenanceModalOpen} handleRefresh={fetchAssetDetails}/>}
+          asset={asset} setIsModalOpen={setMaintenanceModalOpen} handleRefresh={init}/>}
         {movementModalOpen && <MovementModal isModalOpen={movementModalOpen} 
-          asset={asset} setIsModalOpen={setMovementModalOpen} handleRefresh={fetchAssetDetails}/>}
+          asset={asset} setIsModalOpen={setMovementModalOpen} handleRefresh={init}/>}
         {statechangeModalOpen && <StateChangeModal isModalOpen={statechangeModalOpen} 
-          asset={asset} setIsModalOpen={setStateChangeModalOpen} handleRefresh={fetchAssetDetails}/>}
+          asset={asset} setIsModalOpen={setStateChangeModalOpen} handleRefresh={init}/>}
         <Navbar />
         <div className="container mx-auto p-4 min-h-[84vh]">
             {/* Header */}
@@ -278,44 +283,42 @@ export default function AssetDetailsClient() {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-[#F6F6F8]">
                             <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 DATE
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 TYPE
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 PERFORMED BY
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 NOTES
-                            </th>
+                              </th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {maintenanceHistory.map((record, index) => (
-                                <tr key={index}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {record.date}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {record.type}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {record.performedBy}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm text-gray-900">
-                                    {record.notes}
-                                    </td>
+                            {maintenanceHistory?.slice(((maintenancePage - 1) * 5),(maintenancePage * 5)).map((i) => (
+                                <tr key={i.maintenance_id}>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {new Date(i.performed_at).toLocaleString()}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">
+                                    {i.maintenance_type}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {i.performed_by.name}
+                                  </td>
+                                  <td className="px-6 py-4 text-sm text-gray-900">
+                                    {i.notes}
+                                  </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
                 <div className="pt-3">
-                    <p className="text-sm text-gray-700">
-                    Showing 1 to {maintenanceHistory.length} of 15 results
-                    </p>
+                  <Pagination currentPage={maintenancePage} totalPages={Math.ceil((maintenanceHistory?.length ?? 0)/5)} onPageChange={setMaintenancePage}/>
                 </div>
             </div>
 
@@ -332,44 +335,48 @@ export default function AssetDetailsClient() {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-[#F6F6F8]">
                             <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 DATE
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                STATE
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                PREVIOUS STATE
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                NEW STATE
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 CHANGED BY
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 REASON
-                            </th>
+                              </th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {stateHistory.map((record, index) => (
-                            <tr key={index}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {record.date}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {record.state}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                {record.changedBy}
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-900">
-                                {record.reason}
-                                </td>
+                            {stateHistory?.slice(((statePage - 1) * 5),(statePage * 5)).map((i) => (
+                            <tr key={i.history_id}>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {new Date(i.changed_at).toDateString()}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">
+                                {i.previous_state.split('_').join(' ')}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 capitalize">
+                                {i.new_state.split('_').join(' ')}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {i.changed_by.name}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-900">
+                                {i.notes}
+                              </td>
                             </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
                 <div className="pt-3">
-                    <p className="text-sm text-gray-700">
-                    Showing 1 to {stateHistory.length} of 2 results
-                    </p>
+                  <Pagination currentPage={statePage} totalPages={Math.ceil((stateHistory?.length ?? 0)/5)} onPageChange={setStatePage}/>
                 </div>
             </div>
         </div>
