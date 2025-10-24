@@ -59,7 +59,9 @@ export default function Navbar(){
         }else{
             data = await fetchData(`/api/incidents?adminId=${admin_id}&count=true`,setIsLoading);
         }
-        setIncidentcount(data.count)
+        if(data){
+            setIncidentcount(data.count)
+        }
     }
 
     useEffect(()=>{
@@ -74,7 +76,7 @@ export default function Navbar(){
             r.push('/');
         }else{
             const adminData = localStorage.getItem('admin_user');
-        const connectedAdmin : IAdmin = adminData ? JSON.parse(adminData) : null;
+            const connectedAdmin : IAdmin = adminData ? JSON.parse(adminData) : null;
             if (connectedAdmin) {
                 setAdmin(connectedAdmin);
                 if (connectedAdmin .role !== 'superadmin' && pathname.startsWith('/cms')) {
@@ -193,7 +195,6 @@ export default function Navbar(){
                                     )}
                                 </div>
                                 )}
-                                {admin?.role === "superadmin" && (
                                 <div>
                                     <button
                                         onClick={() => setAssetContentMobileMode(!assetContentMobileMode)}
@@ -207,20 +208,19 @@ export default function Navbar(){
                                     </button>
 
                                     {assetContentMobileMode && (
-                                    <div className="mt-2 space-y-2 pl-4">
-                                        <Link href="/IT_assets" onClick={() => setIsMenuOpen(false)} className="block text-sm text-gray-700 hover:text-[#FFA400]">
-                                            Dashboard
-                                        </Link>
-                                        <Link href="/IT_assets/management" onClick={() => setIsMenuOpen(false)} className="block text-sm text-gray-700 hover:text-[#FFA400]">
-                                            Management
-                                        </Link>
-                                        <Link href="/IT_assets/asset_type" onClick={() => setIsMenuOpen(false)} className="block text-sm text-gray-700 hover:text-[#FFA400]">
-                                            Asset types
-                                        </Link>
-                                    </div>
+                                        <div className="mt-2 space-y-2 pl-4">
+                                            <Link href="/IT_assets" onClick={() => setIsMenuOpen(false)} className="block text-sm text-gray-700 hover:text-[#FFA400]">
+                                                Dashboard
+                                            </Link>
+                                            <Link href="/IT_assets/management" onClick={() => setIsMenuOpen(false)} className="block text-sm text-gray-700 hover:text-[#FFA400]">
+                                                Management
+                                            </Link>
+                                            {admin?.role === "superadmin" && <Link href="/IT_assets/asset_type" onClick={() => setIsMenuOpen(false)} className="block text-sm text-gray-700 hover:text-[#FFA400]">
+                                                Asset types
+                                            </Link>}
+                                        </div>
                                     )}
                                 </div>
-                                )}
                             </nav>
                         </div>
                     </Transition>
@@ -287,40 +287,38 @@ export default function Navbar(){
                             )
                         }
                         {
-                            admin?.role === 'superadmin' && (
-                                <div className="flex items-center space-x-4">
-                                    <div className="relative" ref={dropdownAssetManagementRef}>
-                                        <button
-                                            onClick={() => setIsAssetManagementOpen(!isAssetManagementOpen)}
-                                            className={`flex cursor-pointer items-center space-x-2 hover:text-[#FFA400] focus:outline-none ${
-                                                pathname.startsWith('/IT_assets') ? 'text-[#FFA400]' : ''
-                                            }`}
-                                        >
-                                            <span className="font-medium hidden sm:inline">Asset Management</span>
-                                            <ChevronDownIcon className={`h-4 w-4 transition-transform ${isAssetManagementOpen ? 'transform rotate-180' : ''}`}/>
-                                        </button>
-                    
-                                    {/* Dropdown panel */}
-                                    {isAssetManagementOpen && (
-                                        <div className="absolute right-0 mt-2 w-48 font-medium bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
-                                            <Link href="/IT_assets" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
-                                                <ComputerDesktopIcon className="h-5 w-5 mr-3 text-gray-700" />
-                                                Dashboard
-                                                
-                                            </Link>
-                                            <Link href="/IT_assets/management" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
-                                                <WrenchIcon className="h-5 w-5 mr-3 text-gray-700" />
-                                                Management
-                                            </Link>
-                                            <Link href="/IT_assets/asset_type" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
-                                                <CpuChipIcon className="h-5 w-5 mr-3 text-gray-700" />
-                                                Asset Types
-                                            </Link>
-                                        </div>
-                                    )}
+                            <div className="flex items-center space-x-4">
+                                <div className="relative" ref={dropdownAssetManagementRef}>
+                                    <button
+                                        onClick={() => setIsAssetManagementOpen(!isAssetManagementOpen)}
+                                        className={`flex cursor-pointer items-center space-x-2 hover:text-[#FFA400] focus:outline-none ${
+                                            pathname.startsWith('/IT_assets') ? 'text-[#FFA400]' : ''
+                                        }`}
+                                    >
+                                        <span className="font-medium hidden sm:inline">Asset Management</span>
+                                        <ChevronDownIcon className={`h-4 w-4 transition-transform ${isAssetManagementOpen ? 'transform rotate-180' : ''}`}/>
+                                    </button>
+                
+                                {/* Dropdown panel */}
+                                {isAssetManagementOpen && (
+                                    <div className="absolute right-0 mt-2 w-48 font-medium bg-white rounded-md shadow-lg py-1 z-10 border border-gray-200">
+                                        <Link href="/IT_assets" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
+                                            <ComputerDesktopIcon className="h-5 w-5 mr-3 text-gray-700" />
+                                            Dashboard
+                                            
+                                        </Link>
+                                        <Link href="/IT_assets/management" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
+                                            <WrenchIcon className="h-5 w-5 mr-3 text-gray-700" />
+                                            Management
+                                        </Link>
+                                        { admin?.role === 'superadmin' && <Link href="/IT_assets/asset_type" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-[#FFA400]/50">
+                                            <CpuChipIcon className="h-5 w-5 mr-3 text-gray-700" />
+                                            Asset Types
+                                        </Link>}
                                     </div>
+                                )}
                                 </div>
-                            )
+                            </div>
                         }
                     </nav>
                 </div>

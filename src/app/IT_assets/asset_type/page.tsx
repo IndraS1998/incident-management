@@ -8,6 +8,9 @@ import { alertService } from "@/lib/alert.service";
 import PageLoader from "@/components/loaders/pageLoaders";
 import { fetchData } from "@/lib/functions";
 import Pagination from "@/components/Pagination/file";
+import { protectRoute } from "@/lib/functions";
+import ErrorPage from "@/components/error";
+import NotAuthorized from "@/components/403";
 
 interface AssetType {
   _id: string;
@@ -25,13 +28,20 @@ export default function AssetTypeManagement() {
   const [loading,setLoading] = useState<boolean>(false)
   const [assetTypes, setAssetTypes] = useState<AssetType[]>([]);
   const [page,setPage] = useState<number>(1)
+  const [connectionError,setConnectionError] = useState<boolean>(false)
+  const [notAllowed,setNotAllowed] = useState<boolean>(false)
 
   async function fetchAssetTypes(){
     const data = await fetchData('/api/assets/types',setLoading);
-    setAssetTypes(data)
+    if(data){
+      setAssetTypes(data)
+    }else{
+      setConnectionError(true)
+    }
   }
 
   useEffect(()=>{
+    protectRoute(setNotAllowed)
     fetchAssetTypes();
   },[])
 
@@ -54,6 +64,14 @@ export default function AssetTypeManagement() {
     setSearchTerm('');
     fetchAssetTypes();
   };
+
+  if(notAllowed){
+    return <NotAuthorized />
+  }
+
+  if(connectionError){
+    return <ErrorPage refresh={()=>{setConnectionError(true)}}/>
+  }
 
   return (
     <div className="bg-[#F6F6F8] ">

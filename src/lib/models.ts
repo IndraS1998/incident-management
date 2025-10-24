@@ -96,6 +96,7 @@ export interface IIncident extends Document {
   reporter_email: string;
   reporter_contact?: string;
   room_id: Types.ObjectId | IRoom;
+  asset_id?: Types.ObjectId | IAsset;
   created_at?: Date;
   updated_at?: Date;
 }
@@ -222,6 +223,7 @@ const IncidentSchema = new Schema<IIncident>({
   reporter_email: { type: String, required: true },
   reporter_contact: { type: String },
   room_id: { type: Schema.Types.ObjectId, ref: 'Room', required: true },
+  asset_id: { type: Schema.Types.ObjectId, ref: 'Asset'},
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }
 });

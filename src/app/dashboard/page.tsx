@@ -1,6 +1,6 @@
 'use client';
 import { NextPage } from 'next';
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import Navbar from '@/components/navbar';
 import Footer from '../../../components/footer/footerComponent';
 import Skeleton from '@/components/skeleton';
@@ -9,6 +9,7 @@ import { fetchData } from '@/lib/functions';
 import {
   LineChart,Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,BarChart,Bar, PieChart, Pie, Cell, Legend,
 } from "recharts";
+import ErrorPage from '@/components/error';
 
 interface Metrics {
     incidentsThisMonth: number;
@@ -65,7 +66,7 @@ const Analytics: NextPage = () => {
     const [resolutionTime, setResolutionTime] = useState<ResolutionTimeData[]>([]);
     const [incidentPercentages, setIncidentPercentages] = useState<IncidentPercentage[]>([]);
     const [severityPoints,setSeverityPoints] = useState<SeverityPoint[]>([])
-
+    const [error,setError] = useState<Error | null>(null)
 
     const { register, watch } = useForm<IncidentVolumeFormValues>({
         defaultValues: { period: "30d" },
@@ -79,36 +80,46 @@ const Analytics: NextPage = () => {
         const data = await fetchData('/api/dashboard/metrics',setMetricsIsLoading)
         if(data){
             setMetrics(data)
+        }else{
+            setError(new Error('Connection error'))
         }
     }
 
-    async function getIncidentVolumeData(){
+    const getIncidentVolumeData = useCallback(async () => {
         const response= await fetchData(`/api/dashboard/incidentVolume?period=${incidentVolumePeriod}`,setIncidentVolumeIsLoading)
         if(response){
             setIncidentVolumeData(response.data)
+        }else{
+            setError(new Error('Connection error'))
         }
-    }
+    }, [incidentVolumePeriod]);
 
-    async function getResolutionTimeByIncident(){
+    const getResolutionTimeByIncident = useCallback( async () => {
         const response = await fetchData(`/api/dashboard/resolutionTime?period=${incidentVolumePeriod}`, setIncidentVolumeIsLoading);
         if(response){
             setResolutionTime(response)
+        }else{
+            setError(new Error('Connection error'))
         }
-    }
+    },[incidentVolumePeriod])
 
-    async function getIncidentTypePercentage(){
+    const getIncidentTypePercentage = useCallback(async () =>{
         const response = await fetchData(`/api/dashboard/incidentTypePercentage?period=${incidentVolumePeriod}`,setIncidentVolumeIsLoading)
         if(response){
             setIncidentPercentages(response)
+        }else{
+            setError(new Error('Connection error'))
         }
-    }
+    },[incidentVolumePeriod])
 
-    async function getUrgencyDistribution(){
+    const getUrgencyDistribution = useCallback(async () => {
         const response = await fetchData(`/api/dashboard/urgencyDistribution?period=${incidentVolumePeriod}`,setIncidentVolumeIsLoading)
         if(response){
             setSeverityPoints(response.data)
+        }else{
+            setError(new Error('Connection error'))
         }
-    }
+    },[incidentVolumePeriod])
 
     useEffect(() => {
         getMetrics();
@@ -119,9 +130,14 @@ const Analytics: NextPage = () => {
         getResolutionTimeByIncident()
         getIncidentTypePercentage()
         getUrgencyDistribution();
-    },[incidentVolumePeriod])
+    },[getIncidentTypePercentage, getIncidentVolumeData, getResolutionTimeByIncident, getUrgencyDistribution, incidentVolumePeriod])
 
-    
+    if(Boolean(error)){
+        return <ErrorPage refresh={()=>{
+            setError(null)
+            window.location.reload()
+        }} />
+    }
 
     return (
         <div className="min-h-screen bg-[#F6F6F8]">
@@ -309,11 +325,11 @@ const Analytics: NextPage = () => {
                             {incidentPercentages.map((item, index) => (
                             <div key={item.incidentType} className="flex items-center">
                                 <span
-                                 className="w-3 h-3 mr-2 rounded-sm"
-                                 style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                                className="w-3 h-3 mr-2 rounded-sm"
+                                style={{ backgroundColor: COLORS[index % COLORS.length] }}
                                 ></span>
                                 <span className='capitalize'>
-                                 {item.incidentType} ({item.percentage}%)
+                                {item.incidentType} ({item.percentage}%)
                                 </span>
                             </div>
                             ))}
@@ -358,6 +374,6 @@ const Analytics: NextPage = () => {
             </main>
             <Footer />
         </div>
-    )};
+)};
 
 export default Analytics;

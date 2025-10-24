@@ -6,9 +6,10 @@ import { useForm } from "react-hook-form";
 import PageLoader from "@/components/loaders/pageLoaders";
 import { alertService } from "@/lib/alert.service";
 import { MagnifyingGlassIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { fetchData } from "@/lib/functions"; 
+import { fetchData,mutateData } from "@/lib/functions"; 
 import Pagination from "@/components/Pagination/file";
 import Link from 'next/link';
+import MaintenanceBadge from "@/components/asset/badge/maintenanceBadge";
 
 enum AssetState {
   IN_STOCK = 'in_stock',
@@ -37,6 +38,7 @@ interface Asset {
   age: string;
   maintenance_frequency: number;
   date_in_production:string;
+  nextRoutineMaintenanceDate: string | number | null;
 }
 
 interface AssetType {
@@ -72,8 +74,37 @@ export default function AssetManagement() {
   }
 
   async function fetchAssets(){
-    const data = await fetchData('/api/assets/creation',setLoading)
-    setAssets(data)
+    const adminData = localStorage.getItem('admin_user');
+    const connectedAdmin : IAdmin = adminData ? JSON.parse(adminData) : null;
+    let data = []
+    if(connectedAdmin.role !== AdminRole.DEPARTMENT_ADMIN){
+      data = await fetchData('/api/assets/creation',setLoading)
+      console.log(data)
+    }else{
+      setLoading(true)
+      try{
+        const response = await fetch('/api/assets/creation',{
+          method:'PATCH',
+          headers:{
+            'Content-Type':'application/json'
+          },
+          body: JSON.stringify({adminId:connectedAdmin._id})
+        })
+        if(!response.ok){
+          const errorData = await response.json()
+          throw new Error(errorData.error || 'Failed to fetch data')
+        }
+        data = await response.json()
+      }catch(error){
+        console.log(error)
+        alertService.error('Error creating asset. Please try again later')
+      }finally{
+        setLoading(false)
+      }
+    }
+    if(data){
+      setAssets(data)
+    }
   }
 
   useEffect(() =>{
@@ -401,7 +432,7 @@ export default function AssetManagement() {
                         </span>
                       </td>
                       <td className="py-3 px-4 text-sm text-gray-600">
-                        Every {asset.maintenance_frequency} months
+                        <MaintenanceBadge nextRoutineMaintenanceDate={asset.nextRoutineMaintenanceDate}/>
                       </td>
                       <td className="py-3 px-4">
                           <div className="flex space-x-2">
@@ -459,8 +490,18 @@ function ModalContent({closeModal,onConfirm}: {closeModal: () => void,
   const selectedFloor = watch('floor');
 
   async function fetchDepartments(){
-    const response = await fetchData('/api/assets/creation/departments',setLoading)
-    setDepartments(response)
+    const adminData = localStorage.getItem('admin_user');
+    const connectedAdmin : IAdmin = adminData ? JSON.parse(adminData) : null;
+    let response
+    if(connectedAdmin.role === AdminRole.SUPERADMIN){
+      response = await fetchData('/api/assets/creation/departments',setLoading)
+      setDepartments(response)
+    }else{
+      response = await mutateData(`/api/assets/creation/departments`,setLoading,'PATCH',{adminId:connectedAdmin._id})
+    }
+    if(response){
+      setDepartments(response)
+    }
   }
 
   const getBuildings = useCallback(async () => {
@@ -610,4 +651,25 @@ function ModalContent({closeModal,onConfirm}: {closeModal: () => void,
       </div>
     </div>
   );
+}
+
+enum AdminStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
+
+enum AdminRole {
+  SUPERADMIN = 'superadmin',
+  DEPARTMENT_ADMIN = 'incident_manager',
+}
+
+interface IAdmin {
+  _id:string;
+  admin_id: string; // Unique identifier for the admin composed of first letter of first name and lastname
+  name: string;
+  email: string;
+  phone: string;
+  password_hash: string;
+  status: AdminStatus;
+  role: AdminRole;
 }

@@ -1,5 +1,34 @@
 import { alertService } from "./alert.service"
 
+enum AdminStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
+
+enum AdminRole {
+  SUPERADMIN = 'superadmin',
+  DEPARTMENT_ADMIN = 'incident_manager',
+}
+
+interface IAdmin {
+  _id:string;
+  admin_id: string; // Unique identifier for the admin composed of first letter of first name and lastname
+  name: string;
+  email: string;
+  phone: string;
+  password_hash: string;
+  status: AdminStatus;
+  role: AdminRole;
+}
+
+export function protectRoute(setter:(val:boolean)=>void){
+  const adminData = localStorage.getItem('admin_user');
+  const connectedAdmin : IAdmin = adminData ? JSON.parse(adminData) : null;
+  if(connectedAdmin.role === AdminRole.DEPARTMENT_ADMIN){
+    setter(true)
+  }
+}
+
 export function createAdministratorId(str: string):string{
     const strArr = str.trim().split(/\s+/)
     if (strArr.length < 2) {
@@ -35,20 +64,59 @@ export function timeSince(date: Date, now: Date = new Date()): string {
   return 'just now';
 }
 
-export async function fetchData(url:string,loader:(val:boolean)=>void){
-    loader(true)
-    try{
-        const response = await fetch(url)
-        if(!response.ok){
-          alertService.error("Oops! something went wrong")
-          return null
-        }
-        const data = await response.json()
-        return data
-    }catch(error){
-        console.log(error)
-        alertService.error("Oops! something went wrong")
-    }finally{
-        loader(false)
+export async function mutateData(
+  url:string,
+  loader:(val:boolean)=>void,
+  method:'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' = 'GET',
+  body?:unknown,
+  message?:string
+){
+  loader(true)
+  try{
+    const response = await fetch(url,{
+      method,
+      headers:{
+        'Content-Type':'application/json'
+      },
+      body: JSON.stringify(body)
+    })
+    if(!response.ok){
+      alertService.error('Server Error!. Please try again later')
+      return null
     }
+    if(message){
+      alertService.success(message)
+    }
+    const data = await response.json()
+    return data
+    
+  }catch(error){
+    console.log(error)
+    alertService.error('Connection Error1. Please try again later')
+    return null
+  }finally{
+    loader(false)
+  }
+}
+
+export async function fetchData(
+  url:string,
+  loader:(val:boolean)=>void,
+){
+  loader(true)
+  try{
+      const response = await fetch(url)
+      if(!response.ok){
+        alertService.error("Oops! something went wrong")
+        return null
+      }
+      const data = await response.json()
+      return data
+    }catch(error){
+      console.log(error)
+      alertService.error("Oops! something went wrong")
+      return null
+    }finally{
+      loader(false)
+    }  
 }
