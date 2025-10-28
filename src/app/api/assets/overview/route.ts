@@ -2,7 +2,7 @@ import { NextResponse  } from 'next/server';
 import { Asset, AssetMaintenance, AssetStateHistory,Room } from '@/lib/models';
 import { connectDatabase } from '@/lib/connect';
 
-export enum AssetState {
+enum AssetState {
   IN_STOCK = 'in_stock',
   IN_USE = 'in_use',
   RETIRED = 'retired',
